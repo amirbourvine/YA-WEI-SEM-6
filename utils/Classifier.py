@@ -5,7 +5,7 @@ from KNN import kNN
 from consts import TEST_SIZE
 
 class Classifier:
-    def __init__(self, distances_mat, labels, n_neighbors, labels_padded, rows_factor, cols_factor, num_patches_in_row, is_divided):
+    def __init__(self, distances_mat, labels, n_neighbors, labels_padded, rows_factor, cols_factor, num_patches_in_row, is_divided, weights=None):
         self.distances_mat = distances_mat
         self.labels = labels
         self.n_neighbors = n_neighbors
@@ -15,6 +15,7 @@ class Classifier:
         self.num_patches_in_row = num_patches_in_row
         self.is_divided = is_divided
         self.test_size = TEST_SIZE
+        self.weights = weights
 
 
     def throw_0_labels(self, patch_to_points_dict):
@@ -106,8 +107,8 @@ class Classifier:
         clf.fit(labels=labels_train, patch_to_points_dict=patch_to_points_dict)
 
 
-        train_acc, train_preds,train_gt = clf.score(dmat_train, indices_train, self.labels_padded)
-        test_acc, test_preds,test_gt= clf.score(dmat_test, indices_test, self.labels_padded)
+        train_acc, train_preds,train_gt = clf.score(dmat_train, indices_train, self.labels_padded, self.weights)
+        test_acc, test_preds,test_gt= clf.score(dmat_test, indices_test, self.labels_padded, self.weights)
 
         print("Train Accuracy: ",train_acc)
         print("Test Accuracy: ",test_acc)

@@ -14,7 +14,7 @@ def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=Tru
         
         X = X.to(device)
         y = y.to(device)
-    
+
         my_HDD_HDE = HDD_HDE(X,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch)
 
         print("XXXXXXX IN METHOD XXXXXXXXX")
@@ -44,7 +44,7 @@ def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=Tru
 
 
 
-def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center'):
+def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', weights = None):
     st = time.time()
     
     num_patches = int(np.ceil(X.shape[0]/rows_factor)*np.ceil(X.shape[1]/cols_factor))
@@ -72,6 +72,6 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
         y_patches = y_patches.cpu()
         labels_padded = labels_padded.cpu()
 
-    clf = Classifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True)
+    clf = Classifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights)
 
     clf.classify()
