@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS
+from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, APPLY_2_NORM
 import time
 
 
@@ -201,7 +201,7 @@ class HDD_HDE:
         return X_normalized
 
  
-    def calc_P(d, apply_2_norm=False):
+    def calc_P(d, apply_2_norm=APPLY_2_NORM):
         epsilon = CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
 
         # print("epsilon: ", epsilon, flush=True)
@@ -248,45 +248,35 @@ class HDD_HDE:
         num_patches_in_row = y_patches.shape[1]
 
         y_patches = y_patches.flatten()
+
         X_patches = torch.reshape(X_patches, (-1, np.prod(X_patches.shape[2:])))
+
+
         distances = torch.cdist(X_patches, X_patches)
         
         del X_patches
 
-        P = HDD_HDE.calc_P(distances, apply_2_norm=True)
-
-        return distances,P,y_patches,num_patches_in_row, labels_padded 
+        return distances,y_patches,num_patches_in_row, labels_padded 
 
 
  
     def calc_hdd(self):
-        st = time.time()
-
-        distances,P,y_patches,num_patches_in_row, labels_padded = self.prepare()
+        distances,y_patches,num_patches_in_row, labels_padded = self.prepare()
         
-        print("PREPARE TIME: ", time.time()-st, flush=True)
-        st = time.time()
+        hdd_mat = HDD_HDE.run_method(distances)
 
-        print("calc_hdd_torch-before HDE", flush=True)
+        return hdd_mat, labels_padded, num_patches_in_row,y_patches
 
+    def run_method(distances):
+        P = HDD_HDE.calc_P(distances, apply_2_norm=APPLY_2_NORM)
         HDE = HDD_HDE.hde(distances)
-
         del distances
-
         torch.abs(HDE, out=HDE)
-
-        print("HDE TIME: ", time.time()-st)
-        st = time.time()
-
-        # print("HDE.shape: ", HDE.shape)
-        print("calc_hdd_torch-before HDD", flush=True)
 
         hdd_mat = HDD_HDE.hdd(HDE, P)
 
-        print("calc_hdd_torch-after HDD", flush=True)
-
         del HDE
 
-        print("HDD TIME: ", time.time()-st)
+        return hdd_mat
 
-        return hdd_mat, labels_padded, num_patches_in_row,y_patches
+

@@ -14,7 +14,7 @@ def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=Tru
         
         X = X.to(device)
         y = y.to(device)
-
+    
         my_HDD_HDE = HDD_HDE(X,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch)
 
         print("XXXXXXX IN METHOD XXXXXXXXX")
