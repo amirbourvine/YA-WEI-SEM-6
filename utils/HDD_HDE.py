@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, APPLY_2_NORM
+from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, APPLY_2_NORM, dist_dtype
 import time
 
 
@@ -110,7 +110,7 @@ class HDD_HDE:
         Vt = Vt.double()
 
         #   print("hde_torch- BEFORE LOOP", flush=True)
-        X = torch.zeros((CONST_K + 1, shortest_paths_mat.shape[0], shortest_paths_mat.shape[1] + 1), dtype=torch.float64, device=device)
+        X = torch.zeros((CONST_K + 1, shortest_paths_mat.shape[0], shortest_paths_mat.shape[1] + 1), dtype=dist_dtype, device=device)
         for k in range (0, CONST_K + 1):
             S = torch.float_power(S_keep, 2 ** (-k))
 
@@ -190,7 +190,7 @@ class HDD_HDE:
  
     def normalize_each_band(X):
         
-        X_normalized = torch.zeros_like(X, dtype=torch.float64, device=device)
+        X_normalized = torch.zeros_like(X, dtype=dist_dtype, device=device)
 
         for i in range(X.shape[2]):
             X_band = X[:,:,i]
