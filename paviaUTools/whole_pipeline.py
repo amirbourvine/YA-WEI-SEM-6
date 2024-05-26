@@ -79,7 +79,7 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
     st = time.time()
     
     mp.set_start_method('spawn')
-    pool_size =  POOL_SIZE if torch.cuda.is_available() else multiprocessing.cpu_count() * 2
+    pool_size =  POOL_SIZE if torch.cuda.is_available() else mp.cpu_count() * 2
     pool = mp.Pool(processes=pool_size)
 
 
