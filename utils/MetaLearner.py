@@ -12,3 +12,6 @@ class HDDOnBands:
         print("distances.shape: ", distances.shape)
 
         return HDD_HDE.run_method(distances)
+    
+    def createWeights(tensor):
+        return torch.sum(HDDOnBands.run(tensor), axis=1)
