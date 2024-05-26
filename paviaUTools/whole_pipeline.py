@@ -3,7 +3,7 @@ import torch
 from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS
 import time
 from HDD_HDE import *
-from Classifier import *
+from PaviaClassifier import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device: ", device)
@@ -34,7 +34,7 @@ def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=Tru
             y_patches = y_patches.cpu()
             labels_padded = labels_padded.cpu()
 
-        clf = Classifier(d_HDD.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=False)
+        clf = PaviaClassifier(d_HDD.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=False)
 
         clf.classify()
 
@@ -72,6 +72,6 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
         y_patches = y_patches.cpu()
         labels_padded = labels_padded.cpu()
 
-    clf = Classifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights)
+    clf = PaviaClassifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights)
 
     clf.classify()
