@@ -13,5 +13,8 @@ class HDDOnBands:
 
         return HDD_HDE.run_method(distances)
     
-    def createWeights(tensor):
-        return torch.sum(HDDOnBands.run(tensor), axis=1)
+    def createUniformWeightedBatches(tensor):
+        return torch.ones(tensor.shape[-1]), [[i] for i in range(tensor.shape[-1])]
+
+    def createL1WeightedBatches(tensor):
+        return torch.sum(HDDOnBands.run(tensor), axis=1), [[i] for i in range(tensor.shape[-1])]
