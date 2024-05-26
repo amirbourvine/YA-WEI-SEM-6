@@ -8,3 +8,4 @@ N_NEIGHBORS = 3
 TEST_SIZE = 0.2
 APPLY_2_NORM =True
 dist_dtype = torch.float64 #for resolution adjustments
+POOL_SIZE = 8

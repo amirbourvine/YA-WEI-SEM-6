@@ -14,4 +14,4 @@ class HDDOnBands:
         return HDD_HDE.run_method(distances)
     
     def createWeights(tensor):
-        return torch.sum(HDDOnBands.run(tensor), axis=1)
+        return torch.sum(HDDOnBands.run(tensor), axis=1).cpu().numpy()
