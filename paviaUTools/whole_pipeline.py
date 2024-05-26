@@ -61,6 +61,8 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
             del d_HDD
             del labels_padded
             del y_patches
+        
+        print(f"DONE ITER. #{i+1} of {X.shape[-1]}")
 
 
     print("TOTAL TIME FOR METHOD: ", time.time()-st)
