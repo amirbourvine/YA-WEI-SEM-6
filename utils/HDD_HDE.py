@@ -268,6 +268,7 @@ class HDD_HDE:
     def calc_hdd_multiproc(X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, i):
         my_hdd_hde = HDD_HDE(X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch)
         hdd_mat, labels_padded, num_patches_in_row,y_patches = my_hdd_hde.calc_hdd()
+
         return hdd_mat, i
 
     def run_method(distances):
