@@ -74,11 +74,13 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
     clf.classify()
 
 
-
 def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', weights = None):
     st = time.time()
+    try:
+        mp.set_start_method('spawn')
+    except RuntimeError:
+        pass
     
-    mp.set_start_method('spawn')
     pool_size =  POOL_SIZE if torch.cuda.is_available() else mp.cpu_count() * 2
     pool = mp.Pool(processes=pool_size)
 
@@ -99,6 +101,7 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
         
 
     pool.close()  # no more tasks
+
     pool.join()  # wrap up current tasks
 
 

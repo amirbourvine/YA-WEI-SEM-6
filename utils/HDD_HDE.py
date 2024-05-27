@@ -4,6 +4,9 @@ from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, APPLY_2_NORM, dist_dt
 import time
 
 
+import warnings
+warnings.filterwarnings('ignore')
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 cpu = torch.device("cpu")
 
@@ -268,6 +271,9 @@ class HDD_HDE:
     def calc_hdd_multiproc(X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, i):
         my_hdd_hde = HDD_HDE(X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch)
         hdd_mat, labels_padded, num_patches_in_row,y_patches = my_hdd_hde.calc_hdd()
+
+        del X_curr
+        del y
 
         return hdd_mat, i
 
