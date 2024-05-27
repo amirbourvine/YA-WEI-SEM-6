@@ -101,7 +101,7 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
     clf.classify()
 
 
-def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', weights = None):
+def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', weights = None, distance_batches = None):
     st = time.time()
     try:
         mp.set_start_method('spawn')
@@ -115,12 +115,23 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
     num_patches = int(np.ceil(X.shape[0]/rows_factor)*np.ceil(X.shape[1]/cols_factor))
     distance_mat_arr = torch.zeros((X.shape[-1],num_patches,num_patches), device=device)
 
+    
     tup_list = []
-    for i in range(X.shape[-1]):
-        X_curr = X[:,:,i].reshape((X.shape[0],X.shape[1],1))
-        tup = (X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, i)
-        tup_list.append(tup)
 
+    #Old method of dividing to single band distance matrix groups
+    if distance_batches is None:
+        for i in range(X.shape[-1]):
+            X_curr = X[:,:,i].reshape((X.shape[0],X.shape[1],1))
+            tup = (X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, i)
+            tup_list.append(tup)
+    else:
+        #New method to compute distance matarices according to distance_batches
+        batches_amount = len(distance_batches)
+        distance_mat_arr = torch.zeros((batches_amount,num_patches,num_patches), device=device)
+        for i, batch in enumerate(distance_batches):
+            X_curr = X[:,:,batch].reshape(X.shape[0], X.shape[1], len(batch))
+            tup = (X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, i)
+            tup_list.append(tup)
     
     for result in pool.starmap(HDD_HDE.calc_hdd_multiproc, tup_list):
         res,i = result
