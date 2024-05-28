@@ -17,7 +17,11 @@ def findMaxCombinations(tensor, evaluate, min_batch_size, max_batch_size, n):
     # find the n largest evaluated subsets
     values, largest_subsets_indices = torch.topk(evaluated_subsets, n)
 
-    return  values[:(largest_subsets_indices.shape[0])] ,[all_subsets[largest_subsets_indices[i].item()] for i in range(largest_subsets_indices.shape[0])]
+    return  normalize_weights(values[:(largest_subsets_indices.shape[0])]) ,[all_subsets[largest_subsets_indices[i].item()] for i in range(largest_subsets_indices.shape[0])]
+
+def normalize_weights(weights):
+    return torch.nn.functional.normalize(weights, p=1.0, dim = 0)
+
 
 class HDDOnBands:
     def run(tensor):
@@ -31,7 +35,7 @@ class HDDOnBands:
         return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
     def createL1WeightedBatches(tensor):
-        return torch.sum(HDDOnBands.run(tensor), axis=1), [torch.tensor([i]) for i in range(tensor.shape[-1])]
+        return normalize_weights(torch.sum(HDDOnBands.run(tensor), axis=1)), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
     def createMinSimilarityBasedBatches(tensor, n):
         def evaluate(ten):
