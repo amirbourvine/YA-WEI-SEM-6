@@ -63,6 +63,8 @@ class kNN:
 
         new_weights = None
         if weights is not None:
+            print(weights)
+            print(X_kNN.shape[-1])
             new_weights = np.repeat(weights, X_kNN.shape[-1])
 
 
