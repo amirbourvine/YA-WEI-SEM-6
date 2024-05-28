@@ -72,20 +72,20 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
                 del labels_padded
                 del y_patches
 
-    distance_mat_arr = torch.zeros((X.shape[-1],num_patches,num_patches), device=device)
-    for i in range(X.shape[-1]):
+    distance_mat_arr = torch.zeros((batches_amount,num_patches,num_patches), device=device)
+    for i in range(batches_amount):
         X_curr = torch.reshape(X[:,:,i], (X.shape[0],X.shape[1],1))
         my_HDD_HDE = HDD_HDE(X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch)
         d_HDD, labels_padded, num_patches_in_row,y_patches = my_HDD_HDE.calc_hdd()
         distance_mat_arr[i,:,:] = d_HDD
 
-        if i!=X.shape[-1]-1:
+        if i!=batches_amount-1:
             del X_curr
             del d_HDD
             del labels_padded
             del y_patches
         
-        print(f"DONE ITER. #{i+1} of {X.shape[-1]}")
+        print(f"DONE ITER. #{i+1} of {batches_amount}")
 
 
     print("TOTAL TIME FOR METHOD: ", time.time()-st)
