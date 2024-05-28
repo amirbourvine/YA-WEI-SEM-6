@@ -129,7 +129,7 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
         batches_amount = len(distance_batches)
         distance_mat_arr = torch.zeros((batches_amount,num_patches,num_patches), device=device)
         for i, batch in enumerate(distance_batches):
-            X_curr = X[:,:,batch].reshape(X.shape[0], X.shape[1], len(batch))
+            X_curr = X[:,:,batch.long()].reshape(X.shape[0], X.shape[1], len(batch))
             tup = (X_curr,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, i)
             tup_list.append(tup)
     
