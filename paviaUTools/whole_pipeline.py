@@ -139,6 +139,7 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
         distance_mat_arr[i] = res
         
 
+    del tup_list
     pool.close()  # no more tasks
 
     pool.join()  # wrap up current tasks

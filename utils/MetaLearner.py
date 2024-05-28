@@ -28,10 +28,10 @@ class HDDOnBands:
         return HDD_HDE.run_method(distances)
     
     def createUniformWeightedBatches(tensor):
-        return torch.ones(tensor.shape[-1]), [[i] for i in range(tensor.shape[-1])]
+        return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
     def createL1WeightedBatches(tensor):
-        return torch.sum(HDDOnBands.run(tensor), axis=1), [[i] for i in range(tensor.shape[-1])]
+        return torch.sum(HDDOnBands.run(tensor), axis=1), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
     def createMinSimilarityBasedBatches(tensor, n):
         def evaluate(ten):
