@@ -7,5 +7,5 @@ ALPHA = 0.5
 N_NEIGHBORS = 3
 TEST_SIZE = 0.2
 APPLY_2_NORM =True
-dist_dtype = torch.float16 #for resolution adjustments
+dist_dtype = torch.float32 #for resolution adjustments
 POOL_SIZE = 8
