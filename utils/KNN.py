@@ -74,8 +74,8 @@ class kNN:
 
         predictions = np.zeros(X_kNN.shape[0])
         for i in range(predictions.shape[0]):
-            print("X_kNN[i,:]: ", X_kNN[i,:].shape)
-            print("new_weights: ", new_weights.shape)
+            # print("X_kNN[i,:]: ", X_kNN[i,:].shape)
+            # print("new_weights: ", new_weights.shape)
             curr = np.bincount(X_kNN[i,:], weights=new_weights)
             predictions[i] = np.argmax(curr)
 

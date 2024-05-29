@@ -31,9 +31,9 @@ def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=Tru
 
         clf = PaviaClassifier(d_HDD.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=False)
 
-        clf.classify()
+        return clf.classify()
 
-        print("WHOLE CLASSIFICATION TIME: ", time.time()-st)
+        # print("WHOLE CLASSIFICATION TIME: ", time.time()-st)
         
 
 def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', weights = None, distance_batches = None):
@@ -79,13 +79,13 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
         d_HDD, labels_padded, num_patches_in_row,y_patches = my_HDD_HDE.calc_hdd()
         distance_mat_arr[i,:,:] = d_HDD
 
-        if i!=distance_mat_arr-1:
+        if i!=distance_mat_arr.shape[0]-1:
             del X_curr
             del d_HDD
             del labels_padded
             del y_patches
         
-        print(f"DONE ITER. #{i+1} of {distance_mat_arr}")
+        print(f"DONE ITER. #{i+1} of {distance_mat_arr.shape[0]}")
 
 
     print("TOTAL TIME FOR METHOD: ", time.time()-st)
@@ -99,7 +99,7 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
 
     clf = PaviaClassifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights)
 
-    clf.classify()
+    return clf.classify()
 
 
 def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', weights = None, distance_batches = None):
@@ -161,4 +161,4 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
 
     clf = PaviaClassifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights)
 
-    clf.classify()
+    return clf.classify()

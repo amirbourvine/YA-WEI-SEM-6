@@ -48,7 +48,7 @@ class HDD_HDE:
         v[:,s<0] = -u[:,s<0] #replacing the corresponding columns with negative sign
 
         torch.abs(s, out=s)
-
+        
         torch.where(s>TOL, s, torch.tensor([TOL], device=device), out=s)
 
         return u, s, torch.t(v)
@@ -104,6 +104,7 @@ class HDD_HDE:
  
     def hde(shortest_paths_mat):
         #   print("hde_torch", flush=True)
+        
         U, S_keep, Vt = HDD_HDE.calc_svd_p(shortest_paths_mat)
         
         U = U.double()
