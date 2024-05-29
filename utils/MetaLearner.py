@@ -3,6 +3,11 @@ import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+import random
+def random_clusters(clusters_num, dim):
+    buffers = sorted(random.sample(range(1, dim), groups_num - 1))
+    return  [(range(0, buffers[0]))] + [range(buffers[i], buffers[i + 1]) for i in range(len(buffers) - 1)] + [(range(buffers[-1], clusters_num))]
+
 import itertools
 def findMaxCombinations(tensor, evaluate, min_batch_size, max_batch_size, n):
     # Generate all possible not empty subsets
@@ -32,10 +37,13 @@ class HDDOnBands:
 
         return HDD_HDE.run_method(distances)
     
-    def createUniformWeightedBatches(tensor):
-        return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
+    def createUniformWeightedBatches(tensor, clusters_amount=None):
+        if clusters_amount is None:
+            return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
-    def createL1WeightedBatches(tensor):
+        return torch.ones(clusters_amount), random_clusters()
+
+    def createL1WeightedBatches(tensor, clusters_amount=None):
         return normalize_weights(torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy(), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
     def createMinSimilarityBasedBatches(tensor, n):
