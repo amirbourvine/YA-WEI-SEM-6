@@ -43,8 +43,11 @@ class HDDOnBands:
 
         return torch.ones(clusters_amount), random_clusters()
 
-    def createL1WeightedBatches(tensor, clusters_amount=None):
-        return normalize_weights(torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy(), [torch.tensor([i]) for i in range(tensor.shape[-1])]
+    def createL1WeightedBatches(tensor, clusters_amount=None, normalize=True):
+        res = normalize_weights(torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy()
+        if not normalize:
+            res = (torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy()
+        return res, [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
     def createMinSimilarityBasedBatches(tensor, n):
         def evaluate(ten):
