@@ -31,7 +31,7 @@ class HDDOnBands:
 
         return HDD_HDE.run_method(distances)
     
-    def createUniformWeightedBatches(tensor):
+    def createUniformWeightedBatches(tensor, bands_sample_size=None):
         return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
     def createL1WeightedBatches(tensor):
