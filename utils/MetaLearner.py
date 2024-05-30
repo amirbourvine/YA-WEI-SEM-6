@@ -4,9 +4,12 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 import random
-def random_clusters(clusters_num, dim):
-    buffers = sorted(random.sample(range(1, dim), groups_num - 1))
-    return  [(range(0, buffers[0]))] + [range(buffers[i], buffers[i + 1]) for i in range(len(buffers) - 1)] + [(range(buffers[-1], clusters_num))]
+def random_clusters(clusters_num, bands_num):
+    buffers = sorted(random.sample(range(1, bands_num), clusters_num - 1))
+    list = []
+    for i in range(len(buffers) - 1):
+        list.append(torch.tensor(np.arange(buffers[i], buffers[i + 1])))
+    return  [torch.tensor(np.arange(0, buffers[0]))] + list + [torch.tensor(np.arange(buffers[-1], bands_num))]
 
 import itertools
 def findMaxCombinations(tensor, evaluate, min_batch_size, max_batch_size, n):
@@ -41,7 +44,9 @@ class HDDOnBands:
         if clusters_amount is None:
             return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
-        return torch.ones(clusters_amount), random_clusters()
+        bands_num = tensor.shape[-1]
+
+        return torch.ones(clusters_amount), random_clusters(clusters_amount, bands_num)
 
     def createL1WeightedBatches(tensor, clusters_amount=None, normalize=True):
         res = normalize_weights(torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy()
