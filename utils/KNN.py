@@ -50,6 +50,8 @@ class kNN:
                         preds.append(predictions[ind])
                         gt.append(y[i,j])
         
+        print("total classified: ", total_preds)
+
         return total_correct/total_preds, preds,gt
     
     def score_divided(self, distances_arr, indices_test, y, weights):
