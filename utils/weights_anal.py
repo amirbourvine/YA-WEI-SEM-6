@@ -4,7 +4,9 @@ from sklearn.manifold import MDS
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 from matplotlib import colors
-
+import networkx as nx
+import pydot
+from networkx.drawing.nx_pydot import graphviz_layout
 
 def show_distances(distances):
     plt.imshow(distances.cpu().numpy())
@@ -54,6 +56,65 @@ def show_structure(distances):
     cbar = plt.colorbar(ticks=np.linspace(1, max_level, max_level))
     cbar.set_label('level')
     plt.show()
+
+def plot_tree(distances):
+    G = nx.from_numpy_array(distances) 
+    T = nx.minimum_spanning_tree(G)
+
+    # Visualize the graph and the minimum spanning tree
+    am = nx.adjacency_matrix(T)
+
+    find_levels(am)
+
+    plt.spy(am, precision=0.1, markersize=5)
+    plt.show()
+
+    plt.figure(figsize=(100,100))
+    pos = graphviz_layout(T, prog="twopi")
+    nx.draw(T, pos, node_size=6000)
+    plt.show()
+
+
+    # pos = nx.spiral_layout(T,scale=2)
+    # nx.draw(T,pos)
+
+def find_levels(am):
+    am = am.toarray()
+    am = (am!=0)
+    num_nei = np.sum(am,axis=1)
+    front_indices = np.where(num_nei==1).tolist()
+    closed = []
+
+    levels_list_old = np.ones(num_nei.shape[0])
+    levels_list_new = np.zeros(num_nei.shape[0])
+    
+    while(np.all((levels_list_new-levels_list_old)==0)):
+        levels_list_old = levels_list_new.copy()
+
+        front_indices_tmp = front_indices.copy()
+        for i in front_indices:
+
+            nei = np.where((am[i,:])==1).tolist()
+            for j in nei:
+                
+                if (j not in closed) and (levels_list_old[i]+1>levels_list_old[j]):
+                    levels_list_new[j] = levels_list_old[i]+1
+                    if j not in front_indices:
+                        front_indices_tmp.append(j)
+
+
+            front_indices_tmp.remove(i)
+            closed.append(i)
+        
+        front_indices = front_indices_tmp
+                
+
+        
+
+
+
+
+
 
 
 
