@@ -45,8 +45,10 @@ class HDDOnBands:
             return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
         bands_num = tensor.shape[-1]
+        clusters = random_clusters(clusters_amount, bands_num)
+        weights = torch.tensor([len(cluster) for cluster in clusters])
 
-        return torch.ones(clusters_amount), random_clusters(clusters_amount, bands_num)
+        return weights, clusters
 
     def createL1WeightedBatches(tensor, clusters_amount=None, normalize=True):
         res = normalize_weights(torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy()

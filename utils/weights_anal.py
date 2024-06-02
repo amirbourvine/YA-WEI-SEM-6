@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
 def show_distances(distances):
-    plt.imshow(distances)
+    plt.imshow(distances.cpu().numpy())
     plt.colorbar()
     plt.show()
 
