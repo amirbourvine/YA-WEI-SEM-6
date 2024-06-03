@@ -7,7 +7,7 @@ import os
 
 def print_basic_statistics(df, y):
     print("Shape is: ", df.shape)
-    summary = pd.DataFrame([{'class_name': val, 'samples': np.sum(y == val)} for val in range(1,10)])
+    summary = pd.DataFrame([{'class_name': val, 'samples': np.sum(y == val)} for val in range(1,14)])
     print(summary)
     print(summary.sum())
 
@@ -31,6 +31,8 @@ def plot_composite(df):
         data = df.to_numpy().reshape(((1096, 715,102)))
     elif bands_num==103:
         data = df.to_numpy().reshape((((610,340, 103))))
+    elif bands_num==176:
+        data = df.to_numpy().reshape((((512, 614, 176))))
 
     data = np.moveaxis(data, 2, 0)
     ep.plot_rgb(data, rgb=(36, 17, 11), title='Composite Image of Pavia University', figsize=(10, 8))
@@ -47,6 +49,8 @@ def plot_spectral_band(df, num=4):
             arr_list.append((arr.reshape((1096, 715)),c))
         elif bands_num==103:
             arr_list.append((arr.reshape((610, 340)),c))
+        elif bands_num==176:
+            arr_list.append((arr.reshape((512, 614)),c))
 
     _, axs = plt.subplots(1,num, sharex=True, sharey=True, figsize=(15, 15))
     plt.tight_layout(pad=5.0)
