@@ -7,7 +7,9 @@ import random
 from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 
-def random_clusters(clusters_num, bands_num):
+def random_clusters(clusters_num, bands_num, random_seed=None):
+    if random_seed is not None:
+        random.seed(random_seed)
     buffers = sorted(random.sample(range(1, bands_num), clusters_num - 1))
     list = []
     for i in range(len(buffers) - 1):
@@ -34,6 +36,11 @@ def findMaxCombinations(tensor, evaluate, min_batch_size, max_batch_size, n):
 def normalize_weights(weights):
     return torch.nn.functional.normalize(weights, p=1.0, dim = 0)
 
+def uniformWeights(clusters):
+    return torch.tensor([len(cluster) for cluster in clusters])
+
+def sqrtWeights(clusters):
+    return torch.tensor([np.sqrt(len(cluster)) for cluster in clusters])
 
 class HDDOnBands:
     def run(tensor):
@@ -44,13 +51,14 @@ class HDDOnBands:
         return HDD_HDE.run_method(distances)
     
     #Partition component
-    def createUniformWeightedBatches(tensor, clusters_amount=None):
+    def createUniformWeightedBatches(tensor, random_seed=None, clusters_amount=None):
         if clusters_amount is None:
             return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
         bands_num = tensor.shape[-1]
-        clusters = random_clusters(clusters_amount, bands_num)
-        weights = torch.tensor([len(cluster) for cluster in clusters])
+        clusters = random_clusters(clusters_amount, bands_num, random_seed=random_seed)
+        # weights = uniformWeights(clusters)
+        weights = sqrtWeights(clusters)
 
         return weights, clusters
     
@@ -79,10 +87,8 @@ class HDDOnBands:
 
         distances= distances.cpu().numpy()
 
-        similarityClustersAmount = int(distances.shape[0] / clusters_amount)
-
-        aggClustering = AgglomerativeClustering(n_clusters= similarityClustersAmount, metric="precomputed", linkage="average").fit(distances)
-        clustersBySimilarity = [[] for i in range(similarityClustersAmount)]
+        aggClustering = AgglomerativeClustering(n_clusters= clusters_amount, metric="precomputed", linkage="average").fit(distances)
+        clustersBySimilarity = [[] for i in range(clusters_amount)]
         for i, cluster in enumerate(aggClustering.labels_):
             clustersBySimilarity[cluster].append(i)
 

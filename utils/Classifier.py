@@ -5,7 +5,7 @@ from KNN import kNN
 from consts import TEST_SIZE
 
 class Classifier:
-    def __init__(self, distances_mat, labels, n_neighbors, labels_padded, rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=None, is_random=True):
+    def __init__(self, distances_mat, labels, n_neighbors, labels_padded, rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=None, random_seed=None):
         self.distances_mat = distances_mat
         self.labels = labels
         self.n_neighbors = n_neighbors
@@ -16,7 +16,7 @@ class Classifier:
         self.is_divided = is_divided
         self.test_size = TEST_SIZE
         self.weights = weights
-        self.is_random = is_random
+        self.random_seed = random_seed
 
     def split_train_test(self, distances_mat, labels):
         """
@@ -26,8 +26,8 @@ class Classifier:
         for test- distances is test_numXtrain_num mat- distances between each test point to all of the train points
         """
         num_training = int(labels.shape[0]*(1-self.test_size))
-        if not self.is_random:
-            random.seed(42)
+        if self.random_seed is not None:
+            random.seed(self.random_seed)
         indices_train = random.sample(range(0, labels.shape[0]), num_training)
         indices_train = np.sort(indices_train)
         # print(indices_train)
