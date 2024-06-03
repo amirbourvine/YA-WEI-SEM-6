@@ -78,54 +78,6 @@ def plot_tree(distances):
     # pos = nx.spiral_layout(T,scale=2)
     # nx.draw(T,pos)
 
-def find_levels_from_leaves(am):
-    am = am.toarray()
-    am = (am!=0)
-    num_nei = np.sum(am,axis=1)
-
-    front_indices = np.where(num_nei==1)[0].tolist()
-    closed = []
-
-    levels_list_old = np.ones(num_nei.shape[0])
-    levels_list_new = np.zeros(num_nei.shape[0])
-    
-
-    while(np.any((levels_list_new-levels_list_old)!=0)):
-
-        print("**************NEW ITER*****************")
-        print("front_indices: ", front_indices)
-        print("closed: ", closed)
-        print("levels_list_new: ", levels_list_new)
-
-        levels_list_old = levels_list_new.copy()
-
-        front_indices_tmp = []
-
-        for i in front_indices:
-
-            # print(f"for i={i}: {np.where((am[i,:])==1)[0]}")
-
-            nei = np.where((am[i,:])==1)[0].tolist()
-            for j in nei:
-                
-                if (j not in closed) and (levels_list_new[i]+1>levels_list_new[j]):
-                    levels_list_new[j] = levels_list_new[i]+1
-                    if j not in front_indices and j not in front_indices_tmp:
-                        front_indices_tmp.append(j)
-
-
-            closed.append(i)
-        
-        front_indices = front_indices_tmp
-
-
-        print("levels_list_old: ", levels_list_old)
-        print("levels_list_new: ", levels_list_new)
-        print("**************DONE ITER*****************")
-    
-
-    return levels_list_new
-
 
 def find_root(T):
     
