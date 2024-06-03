@@ -64,8 +64,6 @@ def plot_tree(distances):
     # Visualize the graph and the minimum spanning tree
     am = nx.adjacency_matrix(T)
 
-    find_levels(am)
-
     plt.spy(am, precision=0.1, markersize=5)
     plt.show()
 
@@ -77,6 +75,7 @@ def plot_tree(distances):
 
     # pos = nx.spiral_layout(T,scale=2)
     # nx.draw(T,pos)
+
 
 
 def find_root(T):
