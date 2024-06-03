@@ -4,6 +4,9 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 import random
+from sklearn.cluster import AgglomerativeClustering
+import numpy as np
+
 def random_clusters(clusters_num, bands_num):
     buffers = sorted(random.sample(range(1, bands_num), clusters_num - 1))
     list = []
@@ -40,6 +43,7 @@ class HDDOnBands:
 
         return HDD_HDE.run_method(distances)
     
+    #Partition component
     def createUniformWeightedBatches(tensor, clusters_amount=None):
         if clusters_amount is None:
             return torch.ones(tensor.shape[-1]), [torch.tensor([i]) for i in range(tensor.shape[-1])]
@@ -49,6 +53,44 @@ class HDDOnBands:
         weights = torch.tensor([len(cluster) for cluster in clusters])
 
         return weights, clusters
+    
+    def similarityBasedUnsurpervisedClusters(tensor, clusters_amount):
+        distances = HDDOnBands.run(tensor)
+
+        distances= distances.cpu().numpy()
+
+        aggClustering = AgglomerativeClustering(n_clusters=clusters_amount, metric="precomputed", linkage="average").fit(distances)
+        clusters = [[] for i in range(clusters_amount)]
+        for i, cluster in enumerate(aggClustering.labels_):
+            clusters[cluster].append(i)
+        clusters = [torch.tensor(cluster) for cluster in clusters]
+
+        weights = torch.tensor([np.sqrt(len(cluster)) for cluster in clusters])
+            
+        return weights, clusters
+    
+    def regroupingUnsurpervisedClusters(tensor, clusters_amount):
+        distances = HDDOnBands.run(tensor)
+
+        distances= distances.cpu().numpy()
+
+        similarityClustersAmount = int(distances.shape[0] / clusters_amount)
+
+        aggClustering = AgglomerativeClustering(n_clusters= similarityClustersAmount, metric="precomputed", linkage="average").fit(distances)
+        clustersBySimilarity = [[] for i in range(similarityClustersAmount)]
+        for i, cluster in enumerate(aggClustering.labels_):
+            clustersBySimilarity[cluster].append(i)
+
+        clusters = [[] for i in range(clusters_amount)]
+        for similarityCluster in clustersBySimilarity:
+            for i in range(len(similarityCluster)):
+                clusters[i % clusters_amount].append(similarityCluster[i])
+
+        clusters = [torch.tensor(cluster) for cluster in clusters]
+
+        weights = torch.tensor([np.sqrt(len(cluster)) for cluster in clusters])
+            
+        return weights, clusters
 
     def createL1WeightedBatches(tensor, clusters_amount=None, normalize=True):
         res = normalize_weights(torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy()
@@ -56,6 +98,7 @@ class HDDOnBands:
             res = (torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy()
         return res, [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
+    #Evaluation Component
     def createMinSimilarityBasedBatches(tensor, n):
         def evaluate(ten):
             return torch.norm(ten[:,0].float()-ten[:,1].float(), p=1)
