@@ -5,7 +5,7 @@ import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 from matplotlib import colors
 import networkx as nx
-import pydot
+# import pydot
 from networkx.drawing.nx_pydot import graphviz_layout
 
 def show_distances(distances):
@@ -78,38 +78,82 @@ def plot_tree(distances):
     # pos = nx.spiral_layout(T,scale=2)
     # nx.draw(T,pos)
 
-def find_levels(am):
+def find_levels_from_leaves(am):
     am = am.toarray()
     am = (am!=0)
     num_nei = np.sum(am,axis=1)
-    front_indices = np.where(num_nei==1).tolist()
+
+    front_indices = np.where(num_nei==1)[0].tolist()
     closed = []
 
     levels_list_old = np.ones(num_nei.shape[0])
     levels_list_new = np.zeros(num_nei.shape[0])
     
-    while(np.all((levels_list_new-levels_list_old)==0)):
+
+    while(np.any((levels_list_new-levels_list_old)!=0)):
+
+        print("**************NEW ITER*****************")
+        print("front_indices: ", front_indices)
+        print("closed: ", closed)
+        print("levels_list_new: ", levels_list_new)
+
         levels_list_old = levels_list_new.copy()
 
-        front_indices_tmp = front_indices.copy()
+        front_indices_tmp = []
+
         for i in front_indices:
 
-            nei = np.where((am[i,:])==1).tolist()
+            # print(f"for i={i}: {np.where((am[i,:])==1)[0]}")
+
+            nei = np.where((am[i,:])==1)[0].tolist()
             for j in nei:
                 
-                if (j not in closed) and (levels_list_old[i]+1>levels_list_old[j]):
-                    levels_list_new[j] = levels_list_old[i]+1
-                    if j not in front_indices:
+                if (j not in closed) and (levels_list_new[i]+1>levels_list_new[j]):
+                    levels_list_new[j] = levels_list_new[i]+1
+                    if j not in front_indices and j not in front_indices_tmp:
                         front_indices_tmp.append(j)
 
 
-            front_indices_tmp.remove(i)
             closed.append(i)
         
         front_indices = front_indices_tmp
-                
 
-        
+
+        print("levels_list_old: ", levels_list_old)
+        print("levels_list_new: ", levels_list_new)
+        print("**************DONE ITER*****************")
+    
+
+    return levels_list_new
+
+
+def find_root(T):
+    
+    dists = dict(nx.shortest_path_length(T)) 
+
+    max_dists = np.zeros(len(dists))
+
+    for node,distances in dists.items():
+        max_dists[node] = max(distances.values())
+    
+
+    return max_dists.argmin()
+
+
+                
+def find_levels_from_root(T, root):
+    levels = dict(nx.shortest_path_length(T, source=root)) 
+    
+    # print(levels)
+
+    levels_arr = np.zeros(len(levels))
+
+    for node,distance in levels.items():
+        levels_arr[node] = distance
+
+    # print(levels_arr)
+
+    return levels_arr
 
 
 
