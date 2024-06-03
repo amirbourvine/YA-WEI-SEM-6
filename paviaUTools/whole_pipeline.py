@@ -1,10 +1,12 @@
 import numpy as np
 import torch
-from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, POOL_SIZE
+from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, POOL_SIZE, NUM_PARALLEL
 import time
 from HDD_HDE import *
 from PaviaClassifier import *
 import torch.multiprocessing as mp
+from itertools import islice
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 cpu = torch.device("cpu")
@@ -162,3 +164,4 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
     clf = PaviaClassifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights)
 
     return clf.classify()
+
