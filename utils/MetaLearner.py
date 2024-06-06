@@ -70,7 +70,7 @@ class HDDOnBands:
             clusters[cluster].append(i)
         weights = torch.tensor([len(cluster) for cluster in clusters])
 
-        distances= distances.cpu().numpy()
+        distances= distances
 
         aggClustering = AgglomerativeClustering(n_clusters=clusters_amount, metric="precomputed", linkage="average").fit(distances)
         clusters = [[] for i in range(clusters_amount)]
