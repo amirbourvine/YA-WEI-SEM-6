@@ -93,9 +93,11 @@ class HDDOnBands:
             clustersBySimilarity[cluster].append(i)
 
         clusters = [[] for i in range(clusters_amount)]
+        counter = 0
         for similarityCluster in clustersBySimilarity:
-            for i in range(len(similarityCluster)):
-                clusters[i % clusters_amount].append(similarityCluster[i])
+            for band in similarityCluster:
+                clusters[counter % clusters_amount].append(band)
+                counter = counter + 1
 
         clusters = [torch.tensor(cluster) for cluster in clusters]
 
