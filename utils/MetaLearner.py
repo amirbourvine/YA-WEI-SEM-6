@@ -70,7 +70,7 @@ class HDDOnBands:
             clusters[cluster].append(i)
         weights = torch.tensor([len(cluster) for cluster in clusters])
 
-        distances= distances.cpu().numpy()
+        distances= distances
 
         aggClustering = AgglomerativeClustering(n_clusters=clusters_amount, metric="precomputed", linkage="average").fit(distances)
         clusters = [[] for i in range(clusters_amount)]
@@ -93,9 +93,11 @@ class HDDOnBands:
             clustersBySimilarity[cluster].append(i)
 
         clusters = [[] for i in range(clusters_amount)]
+        counter = 0
         for similarityCluster in clustersBySimilarity:
-            for i in range(len(similarityCluster)):
-                clusters[i % clusters_amount].append(similarityCluster[i])
+            for band in similarityCluster:
+                clusters[counter % clusters_amount].append(band)
+                counter = counter + 1
 
         clusters = [torch.tensor(cluster) for cluster in clusters]
 

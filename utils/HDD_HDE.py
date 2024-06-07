@@ -187,6 +187,8 @@ class HDD_HDE:
                 patched_data[i, j] = datapoint
                 patched_labels[i, j] = HDD_HDE.calc_patch_label(labels, i, j, self.rows_factor, self.cols_factor, method=self.method_label_patch)
 
+        print("DEBUG: ",patched_data.shape)
+
         return patched_data, patched_labels, labels
 
  
@@ -250,7 +252,7 @@ class HDD_HDE:
         num_patches_in_row = y_patches.shape[1]
 
         y_patches = y_patches.flatten()
-
+        
         X_patches = torch.reshape(X_patches, (-1, np.prod(X_patches.shape[2:])))
 
 
