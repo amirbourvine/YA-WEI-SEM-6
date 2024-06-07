@@ -1,8 +1,8 @@
 import sys
-# sys.path.append('../utils/')
-# sys.path.append('../paviaUTools/')
-sys.path.insert(0, '../utils')
-sys.path.insert(0, '../paviaUTools')
+sys.path.append('../utils/')
+sys.path.append('../paviaUTools/')
+# sys.path.insert(1, '../utils')
+# sys.path.insert(2, '../paviaUTools')
 
 import matplotlib.pyplot as plt
 from datasetLoader import datasetLoader
@@ -73,6 +73,8 @@ for clusters_amount in clusters_amounts:
     print("clusters amount: ", clusters_amount)
     print("-------------------------")
 
+
+    print("********************Random Partition component********************")
     for i in range(reps):
         weights, dist_batches = HDDOnBands.createUniformWeightedBatches(X, clusters_amount=clusters_amount, random_seed=random_seeds[i])
         train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
@@ -91,7 +93,7 @@ for clusters_amount in clusters_amounts:
 
     avg_acc_train = 0.0
     avg_acc_test = 0.0
-
+    print("********************Similarity based Partition component********************")
     for i in range(reps):
         weights, dist_batches = HDDOnBands.classicUnsurpervisedClustering(X, clusters_amount=clusters_amount)
         train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
@@ -110,6 +112,8 @@ for clusters_amount in clusters_amounts:
 
     avg_acc_train = 0.0
     avg_acc_test = 0.0
+
+    print("********************Regrouping Partition component********************")
 
     for i in range(reps):
         weights, dist_batches = HDDOnBands.regroupingUnsurpervisedClusters(X, clusters_amount=clusters_amount)
