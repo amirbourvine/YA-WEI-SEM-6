@@ -1,8 +1,8 @@
 import sys
-# sys.path.append('../utils/')
-# sys.path.append('../paviaUTools/')
-sys.path.insert(0, '../utils')
-sys.path.insert(0, '../paviaUTools')
+sys.path.append('../utils/')
+sys.path.append('../paviaUTools/')
+# sys.path.insert(1, '../utils')
+# sys.path.insert(2, '../paviaUTools')
 
 import matplotlib.pyplot as plt
 from datasetLoader import datasetLoader
