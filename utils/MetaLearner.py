@@ -1,6 +1,8 @@
 from HDD_HDE import *
 import torch
 
+from HDD_HDE import HDD_HDE
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 import random
