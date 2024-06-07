@@ -42,6 +42,18 @@ def uniformWeights(clusters):
 def sqrtWeights(clusters):
     return torch.tensor([np.sqrt(len(cluster)) for cluster in clusters])
 
+def maxDiffWeights(tensor, clusters):
+    weights = []
+    for cluster in clusters:
+        if len(cluster) == 1:
+            weights.append(0)
+        else:
+            pairs = list(itertools.combinations(cluster, 2))
+            pairs_diffs = [torch.sum(torch.abs(tensor[:, :, a] - tensor[:, :, b])) for (a,b) in pairs]
+            weights.append(max(pairs_diffs))
+
+    return torch.tensor([weights])
+
 class HDDOnBands:
     def run(tensor):
         tmp = torch.reshape(tensor, (tensor.shape[-1], -1)).float()
@@ -58,7 +70,7 @@ class HDDOnBands:
         bands_num = tensor.shape[-1]
         clusters = random_clusters(clusters_amount, bands_num, random_seed=random_seed)
         # weights = uniformWeights(clusters)
-        weights = sqrtWeights(clusters)
+        weights = maxDiffWeights(tensor, clusters)
 
         return weights, clusters
     
@@ -78,7 +90,7 @@ class HDDOnBands:
             clusters[cluster].append(i)
         clusters = [torch.tensor(cluster) for cluster in clusters]
 
-        weights = torch.tensor([np.sqrt(len(cluster)) for cluster in clusters])
+        weights = maxDiffWeights(tensor, clusters)
             
         return weights, clusters
     
@@ -101,7 +113,7 @@ class HDDOnBands:
 
         clusters = [torch.tensor(cluster) for cluster in clusters]
 
-        weights = torch.tensor([np.sqrt(len(cluster)) for cluster in clusters])
+        weights = maxDiffWeights(tensor, clusters)
             
         return weights, clusters
 
