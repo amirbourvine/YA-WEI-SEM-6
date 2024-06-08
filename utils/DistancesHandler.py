@@ -1,6 +1,8 @@
 from consts import *
 import numpy as np
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class DistanceHandler:
     def __init__(self, method_type, distances_bands):
         self.method_type = method_type
@@ -27,7 +29,7 @@ class DistanceHandler:
 
             del X_patches_tmp_tmp
 
-            indices = np.ix_(X_patches, X_patches)
+            indices = torch.meshgrid(X_patches, X_patches)
             distances = self.distances_bands[indices]
 
             del indices
@@ -38,7 +40,7 @@ class DistanceHandler:
 
             del X_patches
 
-            distances = torch.zeros((X_patches_tmp.shape[0],X_patches_tmp.shape[0]))
+            distances = torch.zeros((X_patches_tmp.shape[0],X_patches_tmp.shape[0]), device=device)
 
             for i in range(X_patches_tmp.shape[0]):
                 for j in range(X_patches_tmp.shape[0]):
