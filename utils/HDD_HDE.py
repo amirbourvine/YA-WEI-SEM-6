@@ -37,10 +37,12 @@ class HDD_HDE:
 
     
     def svd_symmetric(M):
+        print("torch.any(M==torch.nan) ? ", torch.any(M==torch.nan))
+
         s,u = torch.linalg.eigh(M)
 
         s, indices = torch.sort(s, descending=True)
-        
+
         u = u[:, indices]
 
         v = u.clone()
@@ -102,15 +104,12 @@ class HDD_HDE:
 
  
     def hde(shortest_paths_mat):
-        #   print("hde_torch", flush=True)
-        
         U, S_keep, Vt = HDD_HDE.calc_svd_p(shortest_paths_mat)
         
         U = U.double()
         S_keep = S_keep.double()
         Vt = Vt.double()
 
-        #   print("hde_torch- BEFORE LOOP", flush=True)
         X = torch.zeros((CONST_K + 1, shortest_paths_mat.shape[0], shortest_paths_mat.shape[1] + 1), dtype=dist_dtype, device=device)
         for k in range (0, CONST_K + 1):
             S = torch.float_power(S_keep, 2 ** (-k))
@@ -186,8 +185,6 @@ class HDD_HDE:
                 patched_data[i, j] = datapoint
                 patched_labels[i, j] = HDD_HDE.calc_patch_label(labels, i, j, self.rows_factor, self.cols_factor, method=self.method_label_patch)
 
-        print("DEBUG: ",patched_data.shape)
-
         return patched_data, patched_labels, labels
 
  
@@ -262,7 +259,7 @@ class HDD_HDE:
  
     def calc_hdd(self):
         distances,y_patches,num_patches_in_row, labels_padded = self.prepare()
-        
+
         hdd_mat = HDD_HDE.run_method(distances)
 
         return hdd_mat, labels_padded, num_patches_in_row,y_patches
