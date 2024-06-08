@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from consts import *
 import time
-
+from DistancesHandler import *
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -18,9 +18,7 @@ class HDD_HDE:
         self.cols_factor = cols_factor
         self.is_normalize_each_band = is_normalize_each_band
         self.method_label_patch = method_label_patch
-        self.method_type = method_type
-        self.distances_bands = distances_bands
-
+        self.distance_handler = DistanceHandler(method_type,distances_bands)
 
  
     def hdd(X,P):
@@ -256,48 +254,7 @@ class HDD_HDE:
 
         y_patches = y_patches.flatten()
         
-        if self.method_type==REGULAR_METHOD:
-            X_patches = torch.reshape(X_patches, (-1, np.prod(X_patches.shape[2:])))
-            distances = torch.cdist(X_patches, X_patches)
-            del X_patches
-
-        elif self.method_type==MEAN_PATCH:
-            X_patches_tmp = torch.mean(X_patches.float(), (2,3))
-
-            del X_patches
-
-            X_patches_tmp_tmp = (torch.max(X_patches_tmp, -1).indices)
-
-            del X_patches_tmp
-
-            X_patches = X_patches_tmp_tmp.reshape((X_patches_tmp_tmp.shape[0]*X_patches_tmp_tmp.shape[1],))
-
-            del X_patches_tmp_tmp
-
-            indices = np.ix_(X_patches, X_patches)
-            distances = self.distances_bands[indices]
-
-            del X_patches
-        
-        elif self.method_type==MEAN_DISTANCES:
-            X_patches_tmp = (torch.max(X_patches, -1).indices).reshape((X_patches.shape[0]*X_patches.shape[1], X_patches.shape[2]*X_patches.shape[3]))
-
-            del X_patches
-
-            distances = torch.zeros((X_patches_tmp.shape[0],X_patches_tmp.shape[0]))
-
-            print("X_patches_tmp[i,:].shape: ", X_patches_tmp[0,:].shape)
-            print("self.distances_bands[(X_patches_tmp[i,:], X_patches_tmp[j,:])]: ", self.distances_bands[(X_patches_tmp[0,:], X_patches_tmp[1,:])].shape)
-
-            for i in range(X_patches_tmp.shape[0]):
-                for j in range(X_patches_tmp.shape[0]):
-                    distances[i,j] = torch.mean(self.distances_bands[(X_patches_tmp[i,:], X_patches_tmp[j,:])])
-
-
-            del X_patches_tmp
-        
-
-        
+        distances = self.distance_handler.calc_distances(X_patches)
 
         return distances,y_patches,num_patches_in_row, labels_padded 
 
