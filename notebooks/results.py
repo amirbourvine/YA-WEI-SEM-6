@@ -66,6 +66,7 @@ if __name__ == '__main__':
     
     distances_bands = HDDOnBands.run(X)
     distances_bands = distances_bands.to(device)
+    
     for method in [MEAN_PATCH, MEAN_DISTANCES]:
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         print("METHOD: ", method)
