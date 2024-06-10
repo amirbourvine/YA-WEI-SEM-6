@@ -64,35 +64,35 @@ if __name__ == '__main__':
  -1079138285,
  -424805109]
     
-    distances_bands = HDDOnBands.run(X)
+    distances_bands = HDDOnBands.run(X, metric='cosine')
     distances_bands = distances_bands.to(device)
     
-    for method in [MEAN_PATCH, MEAN_DISTANCES]:
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        print("METHOD: ", method)
+    # for method in [MEAN_PATCH, MEAN_DISTANCES]:
+    #     print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    #     print("METHOD: ", method)
 
-        for factor in[11,7,5,4]:
-            avg_acc_train = 0.0
-            avg_acc_test = 0.0
-            for i in range(reps):
-                train_acc,test_acc, test_preds,test_gt = whole_pipeline_all(X,y, factor, factor, is_normalize_each_band=False, method_label_patch='most_common', random_seed=random_seeds[i], method_type = method, distances_bands=distances_bands)
-                avg_acc_train += train_acc/reps
-                avg_acc_test += test_acc/reps
+    #     for factor in[11,7,5,4]:
+    #         avg_acc_train = 0.0
+    #         avg_acc_test = 0.0
+    #         for i in range(reps):
+    #             train_acc,test_acc, test_preds,test_gt = whole_pipeline_all(X,y, factor, factor, is_normalize_each_band=False, method_label_patch='most_common', random_seed=random_seeds[i], method_type = method, distances_bands=distances_bands)
+    #             avg_acc_train += train_acc/reps
+    #             avg_acc_test += test_acc/reps
 
-                print("iteration ", i, " DONE")
+    #             print("iteration ", i, " DONE")
 
-                torch.cuda.empty_cache()
-                gc.collect()
+    #             torch.cuda.empty_cache()
+    #             gc.collect()
 
-            print("factor: ", factor)
-            print("avg_acc_train: ", avg_acc_train)
-            print("avg_acc_test: ", avg_acc_test)
+    #         print("factor: ", factor)
+    #         print("avg_acc_train: ", avg_acc_train)
+    #         print("avg_acc_test: ", avg_acc_test)
 
 
-    exit()
+    # exit()
 
     #Partition componenets
-    clusters_amounts = [5,25]
+    clusters_amounts = [2,5]
 
     #Random Partition component
 
@@ -102,8 +102,8 @@ if __name__ == '__main__':
         avg_acc_test = 0.0
 
         factor = 7
-        if clusters_amount in [25]:
-            factor = 11
+        # if clusters_amount in [25]:
+        #     factor = 11
         rows_factor = factor
         cols_factor = factor
 
@@ -112,20 +112,20 @@ if __name__ == '__main__':
         print("clusters amount: ", clusters_amount)
         print("-------------------------")
 
-        for i in range(reps):
-            weights, dist_batches = HDDOnBands.createUniformWeightedBatches(X, clusters_amount=clusters_amount, random_seed=random_seeds[i])
-            train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
-            avg_acc_train += train_acc/reps
-            avg_acc_test += test_acc/reps
+        # for i in range(reps):
+        #     weights, dist_batches = HDDOnBands.createUniformWeightedBatches(X, clusters_amount=clusters_amount, random_seed=random_seeds[i])
+        #     train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
+        #     avg_acc_train += train_acc/reps
+        #     avg_acc_test += test_acc/reps
 
-            print("iteration ", i, " DONE")
+        #     print("iteration ", i, " DONE")
 
-            torch.cuda.empty_cache()
-            gc.collect()
+        #     torch.cuda.empty_cache()
+        #     gc.collect()
 
-        print("Random Partition component")
-        print("avg_acc_train: ", avg_acc_train)
-        print("avg_acc_test: ", avg_acc_test)
+        # print("Random Partition component")
+        # print("avg_acc_train: ", avg_acc_train)
+        # print("avg_acc_test: ", avg_acc_test)
 
 
         #Similarity based Partition component

@@ -60,11 +60,17 @@ def maxDiffWeights(tensor, clusters):
     return torch.tensor([weights])
 
 class HDDOnBands:
-    def run(tensor):
+    def run(tensor, metric=METRIC):
         tmp = torch.reshape(tensor, (tensor.shape[-1], -1)).float()
 
-        distances = torch.cdist(tmp, tmp)
-
+        if metric=='euclidean':
+            distances = torch.cdist(tmp, tmp)
+        elif metric=='cosine':
+            norm = tmp / tmp.norm(dim=1)[:, None]
+            distances = torch.mm(norm, norm.transpose(0,1))
+        else:
+            print("ERROR- INVALID METRIC")
+            return None
         return HDD_HDE.run_method(distances)
     
     #Partition component
@@ -74,7 +80,7 @@ class HDDOnBands:
 
         bands_num = tensor.shape[-1]
         clusters = random_clusters(clusters_amount, bands_num, random_seed=random_seed)
-        weights = uniform_weights(clusters)
+        weights = sqrt_weights(clusters)
 
         return weights, clusters
     
