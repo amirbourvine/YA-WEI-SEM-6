@@ -11,7 +11,7 @@ cpu = torch.device("cpu")
 
 
 class HDD_HDE:
-    def __init__(self, X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', method_type=REGULAR_METHOD, distances_bands=None):
+    def __init__(self, X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', method_type=REGULAR_METHOD, distances_bands=None, precomputed_distances=None):
         self.X = X
         self.y = y
         self.rows_factor = rows_factor
@@ -19,6 +19,7 @@ class HDD_HDE:
         self.is_normalize_each_band = is_normalize_each_band
         self.method_label_patch = method_label_patch
         self.distance_handler = DistanceHandler(method_type,distances_bands)
+        self.precomputed_distances = precomputed_distances
 
  
     def hdd(X,P):
@@ -162,27 +163,30 @@ class HDD_HDE:
 
  
     def patch_data(self, data):
+        return HDD_HDE.patch_data_class(data, self.rows_factor, self.cols_factor, self.y, self.method_label_patch)
+    
+    def patch_data_class(data, rows_factor, cols_factor, y, method_label_patch):
         rows, cols, channels = data.shape
 
-        left_margin = ((-rows) % self.rows_factor) // 2
-        right_margin = ((-rows) % self.rows_factor + 1) // 2
-        top_margin = ((-cols) % self.cols_factor) // 2
-        bottom_margin = ((-cols) % self.cols_factor + 1) // 2
+        left_margin = ((-rows) % rows_factor) // 2
+        right_margin = ((-rows) % rows_factor + 1) // 2
+        top_margin = ((-cols) % cols_factor) // 2
+        bottom_margin = ((-cols) % cols_factor + 1) // 2
 
         data = HDD_HDE.padWithZeros(data, left_margin=left_margin, right_margin=right_margin, top_margin=top_margin, bottom_margin=bottom_margin)
-        labels = HDD_HDE.padWithZeros(self.y, left_margin=left_margin, right_margin=right_margin, top_margin=top_margin, bottom_margin=bottom_margin, dim=2)
+        labels = HDD_HDE.padWithZeros(y, left_margin=left_margin, right_margin=right_margin, top_margin=top_margin, bottom_margin=bottom_margin, dim=2)
 
 
         new_rows, new_cols, _ = data.shape
 
-        patched_data = torch.empty((new_rows // self.rows_factor, new_cols // self.cols_factor, self.rows_factor, self.cols_factor, channels), dtype=data.dtype, device=device)
+        patched_data = torch.empty((new_rows // rows_factor, new_cols // cols_factor, rows_factor, cols_factor, channels), dtype=data.dtype, device=device)
         patched_labels = torch.zeros((patched_data.shape[0], patched_data.shape[1]), dtype=labels.dtype, device=device)
 
-        for i in range(new_rows // self.rows_factor):
-            for j in range(new_cols // self.cols_factor):
-                datapoint = data[i*self.rows_factor: (i+1)*self.rows_factor, j*self.cols_factor: (j+1)*self.cols_factor, :]
+        for i in range(new_rows // rows_factor):
+            for j in range(new_cols // cols_factor):
+                datapoint = data[i*rows_factor: (i+1)*rows_factor, j*cols_factor: (j+1)*cols_factor, :]
                 patched_data[i, j] = datapoint
-                patched_labels[i, j] = HDD_HDE.calc_patch_label(labels, i, j, self.rows_factor, self.cols_factor, method=self.method_label_patch)
+                patched_labels[i, j] = HDD_HDE.calc_patch_label(labels, i, j, rows_factor, cols_factor, method=method_label_patch)
 
         return patched_data, patched_labels, labels
 
@@ -250,7 +254,10 @@ class HDD_HDE:
 
         y_patches = y_patches.flatten()
         
-        distances = self.distance_handler.calc_distances(X_patches)
+        if self.precomputed_distances is None:
+            distances = self.distance_handler.calc_distances(X_patches)
+        else:
+            distances = self.precomputed_distances
 
         return distances,y_patches,num_patches_in_row, labels_padded 
 

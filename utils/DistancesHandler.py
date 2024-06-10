@@ -1,5 +1,6 @@
 from consts import *
 import numpy as np
+import ot
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -48,5 +49,35 @@ class DistanceHandler:
 
 
             del X_patches_tmp
-        
+
+        elif self.method_type==WASSERSTEIN:
+            X_patches_tmp = torch.reshape(X_patches, (-1, X_patches.shape[2], X_patches.shape[3], X_patches.shape[4]))
+            del X_patches
+            X_patches_vector = X_patches_tmp.cpu().numpy()
+            del X_patches_tmp
+
+            #Calculate the sum of each patch to generate its corresponding datapoint
+            X_patches_vector = np.sum(X_patches_vector, axis=-2)
+            X_patches_vector = np.sum(X_patches_vector, axis=-2)
+
+            #Normalize the patches to disturbutions
+            X_patches_vector = np.transpose(X_patches_vector)
+            min_vals = X_patches_vector.min(axis=0, keepdims=True)
+            max_vals = X_patches_vector.max(axis=0, keepdims=True)
+            X_patches_vector = (X_patches_vector - min_vals) / (max_vals - min_vals)
+            X_patches_vector = X_patches_vector / np.sum(X_patches_vector, axis=0)
+
+            distances = np.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
+
+            self.distances_bands = self.distances_bands.cpu().numpy()
+
+            # Compute Wasserstein distance
+            for i in range(X_patches_vector.shape[1]):
+                print(i, " / ", X_patches_vector.shape[1])
+                for j in range(X_patches_vector.shape[1]):
+                    distances[i,j] = ot.emd2(X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands)
+
+            distances = torch.tensor(distances, dtype=dist_dtype)
+            distances = distances.to(device=device)
+
         return distances
