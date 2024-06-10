@@ -38,11 +38,14 @@ def findMaxCombinations(tensor, evaluate, min_batch_size, max_batch_size, n):
 def normalize_weights(weights):
     return torch.nn.functional.normalize(weights, p=1.0, dim = 0)
 
-def uniformWeights(clusters):
+def size_weights(clusters):
     return torch.tensor([len(cluster) for cluster in clusters])
 
-def sqrtWeights(clusters):
+def sqrt_weights(clusters):
     return torch.tensor([np.sqrt(len(cluster)) for cluster in clusters])
+
+def uniform_weights(clusters):
+    return torch.ones(len(clusters))
 
 def maxDiffWeights(tensor, clusters):
     weights = []
@@ -71,8 +74,7 @@ class HDDOnBands:
 
         bands_num = tensor.shape[-1]
         clusters = random_clusters(clusters_amount, bands_num, random_seed=random_seed)
-        # weights = uniformWeights(clusters)
-        weights = maxDiffWeights(tensor, clusters)
+        weights = uniform_weights(clusters)
 
         return weights, clusters
     
@@ -92,7 +94,7 @@ class HDDOnBands:
             clusters[cluster].append(i)
         clusters = [torch.tensor(cluster) for cluster in clusters]
 
-        weights = maxDiffWeights(tensor, clusters)
+        weights = uniform_weights(clusters)
             
         return weights, clusters
     
@@ -115,7 +117,7 @@ class HDDOnBands:
 
         clusters = [torch.tensor(cluster) for cluster in clusters]
 
-        weights = maxDiffWeights(tensor, clusters)
+        weights = uniform_weights(clusters)
             
         return weights, clusters
 
