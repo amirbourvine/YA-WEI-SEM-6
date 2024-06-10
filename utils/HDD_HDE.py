@@ -37,7 +37,6 @@ class HDD_HDE:
 
     
     def svd_symmetric(M):
-        print("torch.any(M==torch.nan) ? ", torch.any(M==torch.nan))
 
         s,u = torch.linalg.eigh(M)
 

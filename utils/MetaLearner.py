@@ -84,8 +84,8 @@ class HDDOnBands:
 
         return weights, clusters
     
-    def classicUnsurpervisedClustering(tensor, clusters_amount):
-        distances = HDDOnBands.run(tensor).cpu().numpy()
+    def classicUnsurpervisedClustering(tensor, clusters_amount, metric= METRIC):
+        distances = HDDOnBands.run(tensor, metric=metric).cpu().numpy()
         clustering = AgglomerativeClustering(n_clusters = clusters_amount, metric="precomputed", linkage='average').fit(distances)
         clusters = [[] for i in range(clusters_amount)]
         for i, cluster in enumerate(clustering.labels_):
@@ -100,12 +100,12 @@ class HDDOnBands:
             clusters[cluster].append(i)
         clusters = [torch.tensor(cluster) for cluster in clusters]
 
-        weights = uniform_weights(clusters)
+        weights = sqrt_weights(clusters)
             
         return weights, clusters
     
-    def regroupingUnsurpervisedClusters(tensor, clusters_amount):
-        distances = HDDOnBands.run(tensor)
+    def regroupingUnsurpervisedClusters(tensor, clusters_amount, metric= METRIC):
+        distances = HDDOnBands.run(tensor, metric= metric)
 
         distances= distances.cpu().numpy()
 
@@ -123,7 +123,7 @@ class HDDOnBands:
 
         clusters = [torch.tensor(cluster) for cluster in clusters]
 
-        weights = uniform_weights(clusters)
+        weights = sqrt_weights(clusters)
             
         return weights, clusters
 

@@ -46,7 +46,7 @@ if __name__ == '__main__':
     X = X.to(device)
     y = y.to(device)
 
-    reps = 10
+    reps = 5
 
     import random
     import numpy as np
@@ -63,10 +63,7 @@ if __name__ == '__main__':
  -2096286485,
  -1079138285,
  -424805109]
-    
-    distances_bands = HDDOnBands.run(X, metric='cosine')
-    distances_bands = distances_bands.to(device)
-    
+ 
     # for method in [MEAN_PATCH, MEAN_DISTANCES]:
     #     print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
     #     print("METHOD: ", method)
@@ -134,7 +131,7 @@ if __name__ == '__main__':
         avg_acc_test = 0.0
 
         for i in range(reps):
-            weights, dist_batches = HDDOnBands.classicUnsurpervisedClustering(X, clusters_amount=clusters_amount)
+            weights, dist_batches = HDDOnBands.classicUnsurpervisedClustering(X, clusters_amount=clusters_amount, metric='cosine')
             train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
             avg_acc_train += train_acc/reps
             avg_acc_test += test_acc/reps
@@ -155,7 +152,7 @@ if __name__ == '__main__':
         avg_acc_test = 0.0
 
         for i in range(reps):
-            weights, dist_batches = HDDOnBands.regroupingUnsurpervisedClusters(X, clusters_amount=clusters_amount)
+            weights, dist_batches = HDDOnBands.regroupingUnsurpervisedClusters(X, clusters_amount=clusters_amount, metric='cosine')
             train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
             avg_acc_train += train_acc/reps
             avg_acc_test += test_acc/reps

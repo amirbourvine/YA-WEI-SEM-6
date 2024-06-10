@@ -9,7 +9,7 @@ TEST_SIZE = 0.2
 APPLY_2_NORM =True
 dist_dtype = torch.float32 #for resolution adjustments
 POOL_SIZE = 3
-METRIC = 'cosine'
+METRIC = 'euclidean'
 
 REGULAR_METHOD = 0
 MEAN_PATCH = 1
