@@ -13,7 +13,10 @@ import torch
 from plots import *
 from weights_anal import *
 from MetaLearner import HDDOnBands
+from HDD_HDE import HDD_HDE
+import DistancesHandler
 from consts import *
+import numpy as np
 
 import gc
 
@@ -50,11 +53,6 @@ if __name__ == '__main__':
 
     reps = 10
 
-    import random
-    import numpy as np
-
-
-
     random_seeds = [-923723872,
     883017324,
     531811554,
@@ -69,15 +67,29 @@ if __name__ == '__main__':
     distances_bands = HDDOnBands.run(X)
     distances_bands = distances_bands.to(device)
 
+    is_normalize_each_band = True
+    method_label_patch='most_common'
+
+
     for method in [WASSERSTEIN]:
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         print("METHOD: ", method)
 
-        for factor in [29]:
+        for factor in [13, 11, 9]:
+            if is_normalize_each_band:
+                X_tmp = HDD_HDE.normalize_each_band(X)
+            else:
+                X_tmp = X
+            X_patches, _, _= HDD_HDE.patch_data_class(X_tmp, factor, factor, y, method_label_patch)
+            distance_handler = DistancesHandler.DistanceHandler(WASSERSTEIN,distances_bands)
+            precomputed_distances = distance_handler.calc_distances(X_patches)
+
+
+
             avg_acc_train = 0.0
             avg_acc_test = 0.0
             for i in range(reps):
-                train_acc,test_acc, test_preds,test_gt = whole_pipeline_all(X,y, factor, factor, is_normalize_each_band=False, method_label_patch='most_common', random_seed=random_seeds[i], method_type = method, distances_bands=distances_bands)
+                train_acc,test_acc, test_preds,test_gt = whole_pipeline_all(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i], method_type = method, distances_bands=distances_bands, precomputed_distances = precomputed_distances)
                 avg_acc_train += train_acc/reps
                 avg_acc_test += test_acc/reps
 
