@@ -83,7 +83,7 @@ class DistanceHandler:
             except RuntimeError:
                 pass
     
-            pool_size =  POOL_SIZE if torch.cuda.is_available() else mp.cpu_count() * 2
+            pool_size =  POOL_SIZE_WASSERSTEIN if torch.cuda.is_available() else mp.cpu_count() * 2
             pool = mp.Pool(processes=pool_size)
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, POOL_SIZE
+from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, POOL_SIZE_HDD
 import time
 from HDD_HDE import *
 from PaviaClassifier import *
@@ -111,7 +111,7 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
     except RuntimeError:
         pass
     
-    pool_size =  POOL_SIZE if torch.cuda.is_available() else mp.cpu_count() * 2
+    pool_size =  POOL_SIZE_HDD if torch.cuda.is_available() else mp.cpu_count() * 2
     pool = mp.Pool(processes=pool_size)
 
 
