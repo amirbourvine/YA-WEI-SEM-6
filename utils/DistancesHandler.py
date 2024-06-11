@@ -1,6 +1,8 @@
 from consts import *
 import numpy as np
 import ot
+import torch.multiprocessing as mp
+import time
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -8,6 +10,9 @@ class DistanceHandler:
     def __init__(self, method_type, distances_bands):
         self.method_type = method_type
         self.distances_bands = distances_bands
+    
+    def emd2_wrapper(vec1, vec2, distances_bands, i, j):
+        return ot.emd2(vec1, vec2, distances_bands), i, j
     
 
     def calc_distances(self, X_patches):
@@ -71,11 +76,52 @@ class DistanceHandler:
 
             self.distances_bands = self.distances_bands.cpu().numpy()
 
-            # Compute Wasserstein distance
+            # st = time.time()
+            # parallel code section START
+            try:
+                mp.set_start_method('spawn')
+            except RuntimeError:
+                pass
+    
+            pool_size =  POOL_SIZE if torch.cuda.is_available() else mp.cpu_count() * 2
+            pool = mp.Pool(processes=pool_size)
+
+
+            tup_list = []
+
             for i in range(X_patches_vector.shape[1]):
-                print(i, " / ", X_patches_vector.shape[1])
                 for j in range(X_patches_vector.shape[1]):
-                    distances[i,j] = ot.emd2(X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands)
+                    tup = (X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands, i, j)
+                    tup_list.append(tup)
+        
+            for result in pool.starmap(DistanceHandler.emd2_wrapper, tup_list):
+                res, i, j = result
+                distances[i,j] = res
+                
+
+            del tup_list
+            pool.close()  # no more tasks
+
+            pool.join()  # wrap up current tasks
+
+
+
+            # parallel code section END
+
+            # print("PARALLEL TIME: ", st-time.time())
+            # st=time.time()
+
+            # # Compute Wasserstein distance
+            # distances_try = np.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
+            # for i in range(X_patches_vector.shape[1]):
+            #     for j in range(X_patches_vector.shape[1]):
+            #         print(f"ITER {i} OUT OF {X_patches_vector.shape[1]}")
+            #         distances_try[i,j] = ot.emd2(X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands)
+
+            # print("SERIAL TIME: ", st-time.time())
+
+            # print("is paralle good ? ", np.allclose(distances, distances_try))
+
 
             distances = torch.tensor(distances, dtype=dist_dtype)
             distances = distances.to(device=device)
