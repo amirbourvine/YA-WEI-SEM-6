@@ -89,7 +89,7 @@ if __name__ == '__main__':
     # exit()
 
     #Partition componenets
-    clusters_amounts = [2,5]
+    clusters_amounts = [5]
 
     #Random Partition component
 
