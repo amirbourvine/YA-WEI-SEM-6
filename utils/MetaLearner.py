@@ -60,14 +60,15 @@ def maxDiffWeights(tensor, clusters):
     return torch.tensor([weights])
 
 class HDDOnBands:
-    def run(tensor, metric=METRIC):
+    def run(tensor, metric):
         tmp = torch.reshape(tensor, (tensor.shape[-1], -1)).float()
 
         if metric=='euclidean':
             distances = torch.cdist(tmp, tmp)
         elif metric=='cosine':
+            print("method is cosine!")
             norm = tmp / tmp.norm(dim=1)[:, None]
-            distances = torch.mm(norm, norm.transpose(0,1))
+            distances = 1 - torch.mm(norm, norm.transpose(0,1))
         else:
             print("ERROR- INVALID METRIC")
             return None
@@ -84,8 +85,8 @@ class HDDOnBands:
 
         return weights, clusters
     
-    def classicUnsurpervisedClustering(tensor, clusters_amount, metric= METRIC):
-        distances = HDDOnBands.run(tensor, metric=metric).cpu().numpy()
+    def classicUnsurpervisedClustering(tensor, clusters_amount):
+        distances = HDDOnBands.run(tensor, metric=METRIC_BANDS).cpu().numpy()
         clustering = AgglomerativeClustering(n_clusters = clusters_amount, metric="precomputed", linkage='average').fit(distances)
         clusters = [[] for i in range(clusters_amount)]
         for i, cluster in enumerate(clustering.labels_):
@@ -104,8 +105,8 @@ class HDDOnBands:
             
         return weights, clusters
     
-    def regroupingUnsurpervisedClusters(tensor, clusters_amount, metric= METRIC):
-        distances = HDDOnBands.run(tensor, metric= metric)
+    def regroupingUnsurpervisedClusters(tensor, clusters_amount):
+        distances = HDDOnBands.run(tensor, metric= METRIC_BANDS)
 
         distances= distances.cpu().numpy()
 
@@ -128,9 +129,9 @@ class HDDOnBands:
         return weights, clusters
 
     def createL1WeightedBatches(tensor, clusters_amount=None, normalize=True):
-        res = normalize_weights(torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy()
+        res = normalize_weights(torch.sum(HDDOnBands.run(tensor, METRIC_BANDS), axis=1)).cpu().numpy()
         if not normalize:
-            res = (torch.sum(HDDOnBands.run(tensor), axis=1)).cpu().numpy()
+            res = (torch.sum(HDDOnBands.run(tensor, ), axis=1)).cpu().numpy()
         return res, [torch.tensor([i]) for i in range(tensor.shape[-1])]
 
     #Evaluation Component
@@ -138,4 +139,4 @@ class HDDOnBands:
         def evaluate(ten):
             return torch.norm(ten[:,0].float()-ten[:,1].float(), p=1)
         
-        return findMaxCombinations(HDDOnBands.run(tensor), evaluate, 2, 2, n)
+        return findMaxCombinations(HDDOnBands.run(tensor, METRIC_BANDS), evaluate, 2, 2, n)

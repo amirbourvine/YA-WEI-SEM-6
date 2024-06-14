@@ -17,9 +17,18 @@ class DistanceHandler:
 
     def calc_distances(self, X_patches):
         if self.method_type==REGULAR_METHOD:
-            X_patches_tmp = torch.reshape(X_patches, (-1, np.prod(X_patches.shape[2:])))
+            X_patches_tmp = torch.reshape(X_patches, (-1, np.prod(X_patches.shape[2:]))).float()
             del X_patches
-            distances = torch.cdist(X_patches_tmp, X_patches_tmp)
+
+            if METRIC_PIXELS=='euclidean':
+                distances = torch.cdist(X_patches_tmp, X_patches_tmp)
+            elif METRIC_PIXELS=='cosine':
+                norm = X_patches_tmp / X_patches_tmp.norm(dim=1)[:, None]
+                distances = 1 - torch.mm(norm, norm.transpose(0,1))
+            else:
+                print("ERROR- INVALID METRIC")
+                return None
+            
             del X_patches_tmp
 
         elif self.method_type==MEAN_PATCH:

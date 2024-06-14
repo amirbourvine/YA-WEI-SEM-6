@@ -10,7 +10,9 @@ APPLY_2_NORM =True
 dist_dtype = torch.float32 #for resolution adjustments
 POOL_SIZE_WASSERSTEIN = 30
 POOL_SIZE_HDD = 3
-METRIC = 'euclidean'
+
+METRIC_BANDS = 'cosine'
+METRIC_PIXELS = 'euclidean'
 
 REGULAR_METHOD = 0
 MEAN_PATCH = 1

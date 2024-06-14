@@ -131,7 +131,7 @@ if __name__ == '__main__':
         avg_acc_test = 0.0
 
         for i in range(reps):
-            weights, dist_batches = HDDOnBands.classicUnsurpervisedClustering(X, clusters_amount=clusters_amount, metric='cosine')
+            weights, dist_batches = HDDOnBands.classicUnsurpervisedClustering(X, clusters_amount=clusters_amount)
             train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
             avg_acc_train += train_acc/reps
             avg_acc_test += test_acc/reps
@@ -152,7 +152,7 @@ if __name__ == '__main__':
         avg_acc_test = 0.0
 
         for i in range(reps):
-            weights, dist_batches = HDDOnBands.regroupingUnsurpervisedClusters(X, clusters_amount=clusters_amount, metric='cosine')
+            weights, dist_batches = HDDOnBands.regroupingUnsurpervisedClusters(X, clusters_amount=clusters_amount)
             train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
             avg_acc_train += train_acc/reps
             avg_acc_test += test_acc/reps
