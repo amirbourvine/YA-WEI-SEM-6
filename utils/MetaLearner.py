@@ -60,19 +60,40 @@ def maxDiffWeights(tensor, clusters):
     return torch.tensor([weights])
 
 class HDDOnBands:
-    def run(tensor, metric):
-        tmp = torch.reshape(tensor, (tensor.shape[-1], -1)).float()
+    def run(tensor, metric, factors_for_batch=None, eps=1e-8):
+        if factors_for_batch is None:
+            if metric!='euclidean' and metric!='cosine':
+                print("ERROR- INVALID METRIC")
+                return None
+            tmp = torch.reshape(tensor, (tensor.shape[-1], -1)).float()
 
-        if metric=='euclidean':
-            distances = torch.cdist(tmp, tmp)
-        elif metric=='cosine':
-            print("method is cosine!")
-            norm = tmp / tmp.norm(dim=1)[:, None]
-            distances = 1 - torch.mm(norm, norm.transpose(0,1))
+            if metric=='euclidean':
+                distances = torch.cdist(tmp, tmp)
+            elif metric=='cosine':
+                norm = tmp / tmp.norm(dim=1)[:, None]
+                distances = 1 - torch.mm(norm, norm.transpose(0,1))
+            return HDD_HDE.run_method(distances)
         else:
-            print("ERROR- INVALID METRIC")
-            return None
-        return HDD_HDE.run_method(distances)
+            rows_factor, cols_factor = factors_for_batch
+            patched_data = HDD_HDE.patch_data_class(tensor, rows_factor, cols_factor, y=None, method_label_patch=None).float()
+            # print(patched_data.shape) # torch.Size([88, 49, 7, 7, 103])
+            tmp = torch.zeros(size=(patched_data.shape[0],patched_data.shape[1], patched_data.shape[-1], patched_data.shape[-1]))
+            for i in range(tmp.shape[0]):
+                for j in range(tmp.shape[1]):
+                    data_tmp = patched_data[i,j,:,:, :]
+                    data_tmp = torch.reshape(data_tmp, (data_tmp.shape[-1], -1))
+                    if metric=='euclidean':
+                        tmp[i,j,:,:] = torch.cdist(data_tmp, data_tmp)
+                    elif metric=='cosine':
+                        # tmp[i,j,:,:] = 1 - torch.nn.functional.cosine_similarity(data_tmp, data_tmp)
+                        norm = data_tmp / torch.max(data_tmp.norm(dim=1)[:, None],torch.tensor(eps,device=device))
+                        tmp[i,j,:,:] = 1 - torch.mm(norm, norm.transpose(0,1))
+                    
+            distances = torch.linalg.norm(tmp, ord = 1, dim=(0,1))
+            
+            return distances
+            
+
     
     #Partition component
     def createUniformWeightedBatches(tensor, random_seed=None, clusters_amount=None):

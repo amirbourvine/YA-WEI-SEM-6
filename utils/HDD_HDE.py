@@ -174,21 +174,25 @@ class HDD_HDE:
         bottom_margin = ((-cols) % cols_factor + 1) // 2
 
         data = HDD_HDE.padWithZeros(data, left_margin=left_margin, right_margin=right_margin, top_margin=top_margin, bottom_margin=bottom_margin)
-        labels = HDD_HDE.padWithZeros(y, left_margin=left_margin, right_margin=right_margin, top_margin=top_margin, bottom_margin=bottom_margin, dim=2)
+        if not(y is None):
+            labels = HDD_HDE.padWithZeros(y, left_margin=left_margin, right_margin=right_margin, top_margin=top_margin, bottom_margin=bottom_margin, dim=2)
 
 
         new_rows, new_cols, _ = data.shape
 
         patched_data = torch.empty((new_rows // rows_factor, new_cols // cols_factor, rows_factor, cols_factor, channels), dtype=data.dtype, device=device)
-        patched_labels = torch.zeros((patched_data.shape[0], patched_data.shape[1]), dtype=labels.dtype, device=device)
+        if not(y is None):
+            patched_labels = torch.zeros((patched_data.shape[0], patched_data.shape[1]), dtype=labels.dtype, device=device)
 
         for i in range(new_rows // rows_factor):
             for j in range(new_cols // cols_factor):
                 datapoint = data[i*rows_factor: (i+1)*rows_factor, j*cols_factor: (j+1)*cols_factor, :]
                 patched_data[i, j] = datapoint
-                patched_labels[i, j] = HDD_HDE.calc_patch_label(labels, i, j, rows_factor, cols_factor, method=method_label_patch)
-
-        return patched_data, patched_labels, labels
+                if not(y is None):
+                    patched_labels[i, j] = HDD_HDE.calc_patch_label(labels, i, j, rows_factor, cols_factor, method=method_label_patch)
+        if not(y is None):
+            return patched_data, patched_labels, labels
+        return patched_data
 
  
     def normalize_each_band(X):
