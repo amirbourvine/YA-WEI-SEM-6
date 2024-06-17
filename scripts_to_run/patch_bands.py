@@ -90,7 +90,7 @@ if __name__ == '__main__':
         avg_acc_train = 0.0
         avg_acc_test = 0.0
 
-        factor = 29
+        factor = 7
         if clusters_amount in [25]:
             factor = 11
         rows_factor = factor
