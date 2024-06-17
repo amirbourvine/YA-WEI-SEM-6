@@ -59,6 +59,13 @@ def maxDiffWeights(tensor, clusters):
 
     return torch.tensor([weights])
 
+# norm = data_tmp / torch.max(data_tmp.norm(dim=1)[:, None],torch.tensor(eps,device=device))
+# tmp[i,j,:,:] = 1 - torch.mm(norm, norm.transpose(0,1))
+def cosine(tensor, eps):
+    tensor[tensor<eps] = eps
+    norm = tensor / tensor.norm(dim=1)[:, None]
+    return 1 - torch.mm(norm, norm.transpose(0,1))
+
 class HDDOnBands:
     def run(tensor, metric, factors_for_batch=None, eps=1e-8):
         if factors_for_batch is None:
@@ -70,8 +77,8 @@ class HDDOnBands:
             if metric=='euclidean':
                 distances = torch.cdist(tmp, tmp)
             elif metric=='cosine':
-                norm = tmp / tmp.norm(dim=1)[:, None]
-                distances = 1 - torch.mm(norm, norm.transpose(0,1))
+                distances = cosine(tmp, eps)
+            
             return HDD_HDE.run_method(distances)
         else:
             rows_factor, cols_factor = factors_for_batch
@@ -86,10 +93,10 @@ class HDDOnBands:
                         tmp[i,j,:,:] = torch.cdist(data_tmp, data_tmp)
                     elif metric=='cosine':
                         # tmp[i,j,:,:] = 1 - torch.nn.functional.cosine_similarity(data_tmp, data_tmp)
-                        norm = data_tmp / torch.max(data_tmp.norm(dim=1)[:, None],torch.tensor(eps,device=device))
-                        tmp[i,j,:,:] = 1 - torch.mm(norm, norm.transpose(0,1))
-                    
-            distances = torch.linalg.norm(tmp, ord = 1, dim=(0,1))
+                        tmp[i,j,:,:] = cosine(data_tmp, eps)
+            
+            tmp = torch.reshape(tmp, shape=(tmp.shape[0]*tmp.shape[1], tmp.shape[2], tmp.shape[3]))
+            distances = torch.linalg.norm(tmp, dim=(0))
             
             return distances
             

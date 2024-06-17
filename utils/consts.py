@@ -8,10 +8,10 @@ N_NEIGHBORS = 1
 TEST_SIZE = 0.2
 APPLY_2_NORM =True
 dist_dtype = torch.float32 #for resolution adjustments
-POOL_SIZE_WASSERSTEIN = 80
+POOL_SIZE_WASSERSTEIN = 40
 POOL_SIZE_HDD = 3
 
-METRIC_BANDS = 'cosine'
+METRIC_BANDS = 'euclidean'
 METRIC_PIXELS = 'euclidean'
 
 REGULAR_METHOD = 0
