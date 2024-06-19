@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from consts import CONST_K,ALPHA,TOL,CONST_C, N_NEIGHBORS, POOL_SIZE_HDD
+import consts
 import time
 from HDD_HDE import *
 from PaviaClassifier import *
@@ -11,7 +11,7 @@ from itertools import islice
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 cpu = torch.device("cpu")
 
-def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, method_type = REGULAR_METHOD, distances_bands=None, precomputed_distances = None):
+def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, method_type = consts.REGULAR_METHOD, distances_bands=None, precomputed_distances = None):
         my_HDD_HDE = HDD_HDE(X,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, method_type, distances_bands, precomputed_distances=precomputed_distances)
 
         print("XXXXXXX IN METHOD XXXXXXXXX")
@@ -31,7 +31,7 @@ def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=Tru
             y_patches = y_patches.cpu()
             labels_padded = labels_padded.cpu()
 
-        clf = PaviaClassifier(d_HDD.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=False, random_seed = random_seed)
+        clf = PaviaClassifier(d_HDD.numpy(), y_patches.numpy(), consts.N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=False, random_seed = random_seed)
 
         return clf.classify()
 
@@ -99,7 +99,7 @@ def whole_pipeline_divided(X,y, rows_factor, cols_factor, is_normalize_each_band
         y_patches = y_patches.cpu()
         labels_padded = labels_padded.cpu()
 
-    clf = PaviaClassifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights, random_seed=random_seed)
+    clf = PaviaClassifier(distance_mat_arr.numpy(), y_patches.numpy(), consts.N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights, random_seed=random_seed)
 
     return clf.classify()
 
@@ -111,7 +111,7 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
     except RuntimeError:
         pass
     
-    pool_size =  POOL_SIZE_HDD if torch.cuda.is_available() else mp.cpu_count() * 2
+    pool_size =  consts.POOL_SIZE_HDD if torch.cuda.is_available() else mp.cpu_count() * 2
     pool = mp.Pool(processes=pool_size)
 
 
@@ -161,7 +161,7 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
         y_patches = y_patches.cpu()
         labels_padded = labels_padded.cpu()
 
-    clf = PaviaClassifier(distance_mat_arr.numpy(), y_patches.numpy(), N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights, random_seed = random_seed)
+    clf = PaviaClassifier(distance_mat_arr.numpy(), y_patches.numpy(), consts.N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=weights, random_seed = random_seed)
 
     return clf.classify()
 
