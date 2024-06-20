@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     
     #Partition componenets
-    clusters_amounts = [5,25]
+    clusters_amounts = [5,25,8,12,16,20,30]
     is_normalize_each_band = True
 
     for clusters_amount in clusters_amounts:
@@ -107,24 +107,6 @@ if __name__ == '__main__':
         print("-------------------------")
         print("clusters amount: ", clusters_amount)
         print("-------------------------")
-
-        #Random Partition component
-
-        for i in range(reps):
-            weights, dist_batches = HDDOnBands.createUniformWeightedBatches(X, clusters_amount=clusters_amount, random_seed=random_seeds[i])
-            train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=is_normalize_each_band, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
-            avg_acc_train += train_acc/reps
-            avg_acc_test += test_acc/reps
-
-            print("iteration ", i, " DONE")
-
-            torch.cuda.empty_cache()
-            gc.collect()
-
-        print("Random Partition component")
-        print("avg_acc_train: ", avg_acc_train)
-        print("avg_acc_test: ", avg_acc_test)
-
 
         #Similarity based Partition component
 
