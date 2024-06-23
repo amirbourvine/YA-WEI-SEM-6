@@ -2,7 +2,7 @@ import numpy as np
 import random
 import time
 from KNN import kNN
-from consts import TEST_SIZE
+import consts
 
 class Classifier:
     def __init__(self, distances_mat, labels, n_neighbors, labels_padded, rows_factor, cols_factor, num_patches_in_row, is_divided=True, weights=None, random_seed=None):
@@ -14,7 +14,7 @@ class Classifier:
         self.cols_factor = cols_factor
         self.num_patches_in_row = num_patches_in_row
         self.is_divided = is_divided
-        self.test_size = TEST_SIZE
+        self.test_size = consts.TEST_SIZE
         self.weights = weights
         self.random_seed = random_seed
 

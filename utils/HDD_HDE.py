@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from consts import *
+import consts
 import time
 from DistancesHandler import *
 import warnings
@@ -11,7 +11,7 @@ cpu = torch.device("cpu")
 
 
 class HDD_HDE:
-    def __init__(self, X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', method_type=REGULAR_METHOD, distances_bands=None, precomputed_distances=None):
+    def __init__(self, X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='center', method_type=consts.REGULAR_METHOD, distances_bands=None, precomputed_distances=None):
         self.X = X
         self.y = y
         self.rows_factor = rows_factor
@@ -25,9 +25,9 @@ class HDD_HDE:
     def hdd(X,P):
         d_HDD = torch.zeros_like(P, device=device)
 
-        for k in range(CONST_K + 1):
+        for k in range(consts.CONST_K + 1):
             norms = torch.cdist(X[k], X[k])
-            sum_matrix = 2 * torch.arcsinh((2 ** (-k * ALPHA + 1)) * norms)
+            sum_matrix = 2 * torch.arcsinh((2 ** (-k * consts.ALPHA + 1)) * norms)
             d_HDD += sum_matrix
 
             del norms
@@ -50,13 +50,13 @@ class HDD_HDE:
 
         torch.abs(s, out=s)
         
-        torch.where(s>TOL, s, torch.tensor([TOL], device=device), out=s)
+        torch.where(s>consts.TOL, s, torch.tensor([consts.TOL], device=device), out=s)
 
         return u, s, torch.t(v)
 
         
     def calc_svd_p(d):
-        epsilon = CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
+        epsilon = consts.CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
 
         W = torch.exp(-1*d/epsilon)
 
@@ -110,14 +110,14 @@ class HDD_HDE:
         S_keep = S_keep.double()
         Vt = Vt.double()
 
-        X = torch.zeros((CONST_K + 1, shortest_paths_mat.shape[0], shortest_paths_mat.shape[1] + 1), dtype=dist_dtype, device=device)
-        for k in range (0, CONST_K + 1):
+        X = torch.zeros((consts.CONST_K + 1, shortest_paths_mat.shape[0], shortest_paths_mat.shape[1] + 1), dtype= consts.dist_dtype, device=device)
+        for k in range (0, consts.CONST_K + 1):
             S = torch.float_power(S_keep, 2 ** (-k))
 
             aux = torch.matmul(torch.matmul(U,torch.diag(S)),Vt)
 
-            aux = torch.t(torch.sqrt((torch.where(aux > TOL, aux, torch.tensor([TOL], device=device)))))
-            X[k] = torch.t(torch.cat((aux, torch.reshape(torch.full((shortest_paths_mat.shape[0],), 2 ** (k * ALPHA - 2), device=device),(1, -1))), dim=0))
+            aux = torch.t(torch.sqrt((torch.where(aux > consts.TOL, aux, torch.tensor([consts.TOL], device=device)))))
+            X[k] = torch.t(torch.cat((aux, torch.reshape(torch.full((shortest_paths_mat.shape[0],), 2 ** (k * consts.ALPHA - 2), device=device),(1, -1))), dim=0))
 
             del aux
             del S
@@ -197,7 +197,7 @@ class HDD_HDE:
  
     def normalize_each_band(X):
         
-        X_normalized = torch.zeros_like(X, dtype=dist_dtype, device=device)
+        X_normalized = torch.zeros_like(X, dtype=consts.dist_dtype, device=device)
 
         for i in range(X.shape[2]):
             X_band = X[:,:,i]
@@ -208,8 +208,8 @@ class HDD_HDE:
         return X_normalized
 
  
-    def calc_P(d, apply_2_norm=APPLY_2_NORM):
-        epsilon = CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
+    def calc_P(d, apply_2_norm=consts.APPLY_2_NORM):
+        epsilon = consts.CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
 
         # print("epsilon: ", epsilon, flush=True)
         W = torch.exp(-1*d/epsilon)
@@ -284,7 +284,7 @@ class HDD_HDE:
         return hdd_mat, i
 
     def run_method(distances):
-        P = HDD_HDE.calc_P(distances, apply_2_norm=APPLY_2_NORM)
+        P = HDD_HDE.calc_P(distances, apply_2_norm=consts.APPLY_2_NORM)
         HDE = HDD_HDE.hde(distances)
         del distances
         torch.abs(HDE, out=HDE)

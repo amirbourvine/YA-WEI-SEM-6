@@ -1,8 +1,10 @@
-from consts import *
+import consts
 import numpy as np
 import ot
 import torch.multiprocessing as mp
 import time
+
+import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -16,13 +18,13 @@ class DistanceHandler:
     
 
     def calc_distances(self, X_patches):
-        if self.method_type==REGULAR_METHOD:
+        if self.method_type==consts.REGULAR_METHOD:
             X_patches_tmp = torch.reshape(X_patches, (-1, np.prod(X_patches.shape[2:]))).float()
             del X_patches
 
-            if METRIC_PIXELS=='euclidean':
+            if consts.METRIC_PIXELS=='euclidean':
                 distances = torch.cdist(X_patches_tmp, X_patches_tmp)
-            elif METRIC_PIXELS=='cosine':
+            elif consts.METRIC_PIXELS=='cosine':
                 norm = X_patches_tmp / X_patches_tmp.norm(dim=1)[:, None]
                 distances = 1 - torch.mm(norm, norm.transpose(0,1))
             else:
@@ -31,7 +33,7 @@ class DistanceHandler:
             
             del X_patches_tmp
 
-        elif self.method_type==MEAN_PATCH:
+        elif self.method_type==consts.MEAN_PATCH:
             X_patches_tmp = torch.mean(X_patches.float(), (2,3))
 
             del X_patches
@@ -50,7 +52,7 @@ class DistanceHandler:
             del indices
             del X_patches
         
-        elif self.method_type==MEAN_DISTANCES:
+        elif self.method_type==consts.MEAN_DISTANCES:
             X_patches_tmp = (torch.max(X_patches, -1).indices).reshape((X_patches.shape[0]*X_patches.shape[1], X_patches.shape[2]*X_patches.shape[3]))
 
             del X_patches
@@ -64,7 +66,7 @@ class DistanceHandler:
 
             del X_patches_tmp
 
-        elif self.method_type==WASSERSTEIN:
+        elif self.method_type==consts.WASSERSTEIN:
             X_patches_tmp = torch.reshape(X_patches, (-1, X_patches.shape[2], X_patches.shape[3], X_patches.shape[4]))
             del X_patches
             X_patches_vector = X_patches_tmp.cpu().numpy()
@@ -92,7 +94,7 @@ class DistanceHandler:
             except RuntimeError:
                 pass
     
-            pool_size =  POOL_SIZE_WASSERSTEIN if torch.cuda.is_available() else mp.cpu_count() * 2
+            pool_size =  consts.POOL_SIZE_WASSERSTEIN if torch.cuda.is_available() else mp.cpu_count() * 2
             pool = mp.Pool(processes=pool_size)
 
 

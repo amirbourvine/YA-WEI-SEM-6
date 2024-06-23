@@ -83,14 +83,14 @@ if __name__ == '__main__':
 
     
     #Partition componenets
-    clusters_amounts = [5,25]
+    clusters_amounts = [8,12,16,20,30]
     is_normalize_each_band = True
 
     for clusters_amount in clusters_amounts:
         avg_acc_train = 0.0
         avg_acc_test = 0.0
 
-        factor = 7
+        factor = 9
         if clusters_amount in [25]:
             factor = 11
         rows_factor = factor

@@ -1,6 +1,6 @@
 from HDD_HDE import *
 import torch
-
+import consts
 from HDD_HDE import HDD_HDE
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -114,7 +114,7 @@ class HDDOnBands:
         return weights, clusters
     
     def classicUnsurpervisedClustering(tensor, clusters_amount, factors_for_batch=None):
-        distances = HDDOnBands.run(tensor, metric=METRIC_BANDS, factors_for_batch=factors_for_batch).cpu().numpy()
+        distances = HDDOnBands.run(tensor, metric=consts.METRIC_BANDS, factors_for_batch=factors_for_batch).cpu().numpy()
         clustering = AgglomerativeClustering(n_clusters = clusters_amount, metric="precomputed", linkage='average').fit(distances)
         clusters = [[] for i in range(clusters_amount)]
         for i, cluster in enumerate(clustering.labels_):
@@ -134,7 +134,7 @@ class HDDOnBands:
         return weights, clusters
     
     def regroupingUnsurpervisedClusters(tensor, clusters_amount, factors_for_batch=None):
-        distances = HDDOnBands.run(tensor, metric= METRIC_BANDS, factors_for_batch=factors_for_batch)
+        distances = HDDOnBands.run(tensor, metric= consts.METRIC_BANDS, factors_for_batch=factors_for_batch)
 
         distances= distances.cpu().numpy()
 
@@ -157,7 +157,7 @@ class HDDOnBands:
         return weights, clusters
 
     def createL1WeightedBatches(tensor, clusters_amount=None, normalize=True):
-        res = normalize_weights(torch.sum(HDDOnBands.run(tensor, METRIC_BANDS), axis=1)).cpu().numpy()
+        res = normalize_weights(torch.sum(HDDOnBands.run(tensor, consts.METRIC_BANDS), axis=1)).cpu().numpy()
         if not normalize:
             res = (torch.sum(HDDOnBands.run(tensor, ), axis=1)).cpu().numpy()
         return res, [torch.tensor([i]) for i in range(tensor.shape[-1])]
@@ -167,4 +167,4 @@ class HDDOnBands:
         def evaluate(ten):
             return torch.norm(ten[:,0].float()-ten[:,1].float(), p=1)
         
-        return findMaxCombinations(HDDOnBands.run(tensor, METRIC_BANDS), evaluate, 2, 2, n)
+        return findMaxCombinations(HDDOnBands.run(tensor, consts.METRIC_BANDS), evaluate, 2, 2, n)
