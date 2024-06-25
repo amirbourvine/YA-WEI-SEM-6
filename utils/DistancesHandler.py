@@ -84,7 +84,7 @@ class DistanceHandler:
             X_patches_vector = (X_patches_vector - min_vals) / (max_vals - min_vals)
             X_patches_vector = X_patches_vector / torch.sum(X_patches_vector, dim=0)
 
-            distances = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
+            distances = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]), device=device)
 
             st = time.time()
             # # parallel code section START
