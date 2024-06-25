@@ -69,26 +69,25 @@ class DistanceHandler:
         elif self.method_type==consts.WASSERSTEIN:
             X_patches_tmp = torch.reshape(X_patches, (-1, X_patches.shape[2], X_patches.shape[3], X_patches.shape[4]))
             del X_patches
-            X_patches_vector = X_patches_tmp.cpu().numpy()
+            X_patches_vector = X_patches_tmp
             del X_patches_tmp
 
             #Calculate the sum of each patch to generate its corresponding datapoint
-            X_patches_vector = np.sum(X_patches_vector, axis=-2)
-            X_patches_vector = np.sum(X_patches_vector, axis=-2)
+            X_patches_vector = torch.sum(X_patches_vector, dim=-2)
+            X_patches_vector = torch.sum(X_patches_vector, dim=-2)
 
             #Normalize the patches to disturbutions
-            X_patches_vector = np.transpose(X_patches_vector)
-            min_vals = X_patches_vector.min(axis=0, keepdims=True)
-            max_vals = X_patches_vector.max(axis=0, keepdims=True)
+            X_patches_vector = torch.transpose(X_patches_vector,0,1)
+            
+            min_vals = X_patches_vector.min(dim=0, keepdims=True).values
+            max_vals = X_patches_vector.max(dim=0, keepdims=True).values
             X_patches_vector = (X_patches_vector - min_vals) / (max_vals - min_vals)
-            X_patches_vector = X_patches_vector / np.sum(X_patches_vector, axis=0)
+            X_patches_vector = X_patches_vector / torch.sum(X_patches_vector, dim=0)
 
-            distances = np.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
+            distances = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
 
-            self.distances_bands = self.distances_bands.cpu().numpy()
-
-            # st = time.time()
-            # parallel code section START
+            # # st = time.time()
+            # # parallel code section START
             try:
                 mp.set_start_method('spawn')
             except RuntimeError:
@@ -122,11 +121,11 @@ class DistanceHandler:
             # print("PARALLEL TIME: ", st-time.time())
             # st=time.time()
 
-            # # Compute Wasserstein distance
-            # distances_try = np.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
+            # Compute Wasserstein distance
+            # distances_try = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
             # for i in range(X_patches_vector.shape[1]):
+            #     print(f"ITER {i} OUT OF {X_patches_vector.shape[1]}")
             #     for j in range(X_patches_vector.shape[1]):
-            #         print(f"ITER {i} OUT OF {X_patches_vector.shape[1]}")
             #         distances_try[i,j] = ot.emd2(X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands)
 
             # print("SERIAL TIME: ", st-time.time())
@@ -134,7 +133,7 @@ class DistanceHandler:
             # print("is paralle good ? ", np.allclose(distances, distances_try))
 
 
-            distances = torch.tensor(distances, dtype=dist_dtype)
-            distances = distances.to(device=device)
+            # distances = torch.tensor(distances, dtype=consts.dist_dtype)
+            # distances = distances.to(device=device)
 
         return distances

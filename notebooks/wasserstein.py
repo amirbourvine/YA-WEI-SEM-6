@@ -15,7 +15,7 @@ from weights_anal import *
 from MetaLearner import HDDOnBands
 from HDD_HDE import HDD_HDE
 import DistancesHandler
-from consts import *
+import consts
 import numpy as np
 
 import gc
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     method_label_patch='most_common'
 
 
-    for method in [WASSERSTEIN]:
+    for method in [consts.WASSERSTEIN]:
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         print("METHOD: ", method)
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
             else:
                 X_tmp = X
             X_patches, _, _= HDD_HDE.patch_data_class(X_tmp, factor, factor, y, method_label_patch)
-            distance_handler = DistancesHandler.DistanceHandler(WASSERSTEIN,distances_bands)
+            distance_handler = DistancesHandler.DistanceHandler(consts.WASSERSTEIN,distances_bands)
             precomputed_distances = distance_handler.calc_distances(X_patches)
 
 
