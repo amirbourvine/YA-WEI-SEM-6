@@ -177,9 +177,17 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
 
 
 
-def wasser_classify(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None):
-        distances_bands = HDDOnBands.run(X, consts.METRIC_BANDS, None)
-        distances_bands = distances_bands.to(device)
+def wasser_classify(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, M=''):
+        if M!='hdd' and M!='euclidean':
+            print("invalid M")
+            return None
+        
+        if M=='hdd':
+            distances_bands = HDDOnBands.run(X, consts.METRIC_BANDS, None)
+            distances_bands = distances_bands.to(device)
+        elif M=='euclidean':
+            tmp = torch.reshape(X, (X.shape[-1], -1)).float()
+            distances_bands = torch.cdist(tmp, tmp)
         
         if is_normalize_each_band:
             X_tmp = HDD_HDE.normalize_each_band(X)

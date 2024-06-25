@@ -80,19 +80,21 @@ if __name__ == '__main__':
     is_normalize_each_band = True
     method_label_patch='most_common'
 
-    for factor in [11,9,7,5]:
-        avg_acc_train = 0.0
-        avg_acc_test = 0.0
-        for i in range(reps):
-            train_acc,test_acc, test_preds,test_gt = wasser_classify(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i])
-            avg_acc_train += train_acc/reps
-            avg_acc_test += test_acc/reps
+    for M in ['hdd', 'euclidean']:
+        print(f"*******************RESULTS OF M={M}************************")
+        for factor in [11,9,7,5]:
+            avg_acc_train = 0.0
+            avg_acc_test = 0.0
+            for i in range(reps):
+                train_acc,test_acc, test_preds,test_gt = wasser_classify(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i], M=M)
+                avg_acc_train += train_acc/reps
+                avg_acc_test += test_acc/reps
 
-            print("iteration ", i, " DONE")
+                print("iteration ", i, " DONE")
 
-            torch.cuda.empty_cache()
-            gc.collect()
+                torch.cuda.empty_cache()
+                gc.collect()
 
-        print("factor: ", factor)
-        print("avg_acc_train: ", avg_acc_train)
-        print("avg_acc_test: ", avg_acc_test)
+            print("factor: ", factor)
+            print("avg_acc_train: ", avg_acc_train)
+            print("avg_acc_test: ", avg_acc_test)
