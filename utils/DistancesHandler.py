@@ -86,7 +86,7 @@ class DistanceHandler:
 
             distances = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
 
-            # # st = time.time()
+            st = time.time()
             # # parallel code section START
             try:
                 mp.set_start_method('spawn')
@@ -95,7 +95,7 @@ class DistanceHandler:
     
             pool_size =  consts.POOL_SIZE_WASSERSTEIN if torch.cuda.is_available() else mp.cpu_count() * 2
             pool = mp.Pool(processes=pool_size)
-
+            print(f"running on device={device} with pool size={pool_size}")
 
             tup_list = []
 
@@ -118,8 +118,7 @@ class DistanceHandler:
 
             # parallel code section END
 
-            # print("PARALLEL TIME: ", st-time.time())
-            # st=time.time()
+            print("PARALLEL WASSER TIME: ", st-time.time())
 
             # Compute Wasserstein distance
             # distances_try = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
