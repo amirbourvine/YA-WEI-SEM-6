@@ -209,3 +209,32 @@ def wasser_classify(X,y, rows_factor, cols_factor, is_normalize_each_band=True, 
         clf = PaviaClassifier(precomputed_distances.numpy(), y_patches.numpy(), consts.N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=False, random_seed = random_seed)
 
         return clf.classify()
+
+
+
+def whole_pipeline_all_euclidean(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None):
+        if is_normalize_each_band:
+            X = HDD_HDE.normalize_each_band(X)
+
+        X_patches, y_patches, labels_padded= HDD_HDE.patch_data_class(X, rows_factor, cols_factor, y, method_label_patch)
+
+        num_patches_in_row = y_patches.shape[1]
+
+        y_patches = y_patches.flatten()
+        
+        distance_handler = DistancesHandler(method_type=consts.REGULAR_METHOD, distances_bands=None)
+        distances = distance_handler.calc_distances(X_patches)
+
+
+        y_patches = y_patches.int()
+        
+        if torch.cuda.is_available():
+            distances = distances.cpu()
+            y_patches = y_patches.cpu()
+            labels_padded = labels_padded.cpu()
+
+        clf = PaviaClassifier(distances.numpy(), y_patches.numpy(), consts.N_NEIGHBORS, labels_padded.numpy(), rows_factor, cols_factor, num_patches_in_row, is_divided=False, random_seed = random_seed)
+
+        return clf.classify()
+
+        
