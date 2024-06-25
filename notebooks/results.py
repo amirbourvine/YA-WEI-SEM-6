@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from datasetLoader import datasetLoader
 import os
 import numpy as np
-from whole_pipeline import whole_pipeline_all, whole_pipeline_divided, whole_pipeline_divided_parallel
+from whole_pipeline import *
 import torch
 from plots import *
 from weights_anal import *
@@ -25,17 +25,20 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     parent_dir = os.path.join(os.getcwd(),"..")
-    csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
-    gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
+    # csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
+    # gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
     # csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
     # gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
+    csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
+    gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
 
     dsl = datasetLoader(csv_path, gt_path)
 
     df = dsl.read_dataset(gt=False)
     X = np.array(df)
-    X = X.reshape((610,340, 103))
+    # X = X.reshape((610,340, 103))
     # X = X.reshape((1096, 715, 102))
+    X = X.reshape((512, 614, 176))
 
     df = dsl.read_dataset(gt=True)
     y = np.array(df)
@@ -46,9 +49,8 @@ if __name__ == '__main__':
     X = X.to(device)
     y = y.to(device)
 
-    reps = 5
+    reps = 10
 
-    import random
     import numpy as np
 
     
@@ -89,18 +91,15 @@ if __name__ == '__main__':
     # exit()
 
     #Partition componenets
-    clusters_amounts = [5]
-
-    #Random Partition component
-
+    clusters_amounts = [2,5,8,12,16,20,30]
     
     for clusters_amount in clusters_amounts:
         avg_acc_train = 0.0
         avg_acc_test = 0.0
 
-        factor = 7
-        # if clusters_amount in [25]:
-        #     factor = 11
+        factor = 9
+        if clusters_amount in [20,30]:
+            factor = 11
         rows_factor = factor
         cols_factor = factor
 
@@ -109,20 +108,22 @@ if __name__ == '__main__':
         print("clusters amount: ", clusters_amount)
         print("-------------------------")
 
-        # for i in range(reps):
-        #     weights, dist_batches = HDDOnBands.createUniformWeightedBatches(X, clusters_amount=clusters_amount, random_seed=random_seeds[i])
-        #     train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
-        #     avg_acc_train += train_acc/reps
-        #     avg_acc_test += test_acc/reps
+        #Random Partition component
 
-        #     print("iteration ", i, " DONE")
+        for i in range(reps):
+            weights, dist_batches = HDDOnBands.createUniformWeightedBatches(X, clusters_amount=clusters_amount, random_seed=random_seeds[i])
+            train_acc,test_acc, test_preds,test_gt = whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', weights=weights, distance_batches= dist_batches, random_seed=random_seeds[i])
+            avg_acc_train += train_acc/reps
+            avg_acc_test += test_acc/reps
 
-        #     torch.cuda.empty_cache()
-        #     gc.collect()
+            print("iteration ", i, " DONE")
 
-        # print("Random Partition component")
-        # print("avg_acc_train: ", avg_acc_train)
-        # print("avg_acc_test: ", avg_acc_test)
+            torch.cuda.empty_cache()
+            gc.collect()
+
+        print("Random Partition component")
+        print("avg_acc_train: ", avg_acc_train)
+        print("avg_acc_test: ", avg_acc_test)
 
 
         #Similarity based Partition component
