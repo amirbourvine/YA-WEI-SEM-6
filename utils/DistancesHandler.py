@@ -118,7 +118,7 @@ class DistanceHandler:
 
             # parallel code section END
 
-            print("PARALLEL WASSER TIME: ", st-time.time())
+            print("PARALLEL WASSER TIME: ", time.time()-st)
 
             # Compute Wasserstein distance
             # distances_try = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))

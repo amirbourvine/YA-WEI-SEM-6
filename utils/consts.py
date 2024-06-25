@@ -7,7 +7,7 @@ ALPHA = 0.5
 N_NEIGHBORS = 1
 TEST_SIZE = 0.2
 APPLY_2_NORM =True
-dist_dtype = torch.float32 #for resolution adjustments
+dist_dtype = torch.float64 #for resolution adjustments
 POOL_SIZE_WASSERSTEIN = 40
 POOL_SIZE_HDD = 3
 

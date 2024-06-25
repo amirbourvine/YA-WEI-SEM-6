@@ -11,6 +11,7 @@ from PaviaClassifier import *
 import torch.multiprocessing as mp
 from itertools import islice
 import DistancesHandler
+from MetaLearner import HDDOnBands,HDD_HDE
 
 
 
