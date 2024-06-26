@@ -93,7 +93,7 @@ class DistanceHandler:
             except RuntimeError:
                 pass
     
-            pool_size =  mp.cpu_count() * 2
+            pool_size =  consts.POOL_SIZE_WASSERSTEIN if torch.cuda.is_available() else mp.cpu_count() * 2
             pool = mp.Pool(processes=pool_size)
             print(f"running on device={device} with pool size={pool_size}")
 
