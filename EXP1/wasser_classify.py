@@ -24,6 +24,7 @@ from HDD_HDE import HDD_HDE
 import DistancesHandler
 import consts
 import numpy as np
+import pandas as pd
 
 import gc
 
@@ -83,6 +84,7 @@ if __name__ == '__main__':
 
     is_normalize_each_band = True
     method_label_patch='most_common'
+    save_to_csv = True
 
     for M in ['hdd', 'euclidean']:
         print(f"*******************RESULTS OF M={M}************************")
@@ -101,6 +103,9 @@ if __name__ == '__main__':
             distance_handler = DistancesHandler.DistanceHandler(consts.WASSERSTEIN,distances_bands)
             precomputed_distances = distance_handler.calc_distances(X_patches)
 
+            if save_to_csv:
+                df = pd.DataFrame(precomputed_distances.cpu().numpy())
+                df.to_csv(f"wasser_{M}_{factor}_{csv_path}",index=False)
 
             avg_acc_train = 0.0
             avg_acc_test = 0.0
