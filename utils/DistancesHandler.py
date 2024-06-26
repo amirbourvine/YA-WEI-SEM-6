@@ -93,7 +93,7 @@ class DistanceHandler:
             except RuntimeError:
                 pass
     
-            pool_size =  consts.POOL_SIZE_WASSERSTEIN if torch.cuda.is_available() else mp.cpu_count() * 2
+            pool_size =  mp.cpu_count() * 2
             pool = mp.Pool(processes=pool_size)
             print(f"running on device={device} with pool size={pool_size}")
 
@@ -103,11 +103,12 @@ class DistanceHandler:
                 for j in range(X_patches_vector.shape[1]):
                     tup = (X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands, i, j)
                     tup_list.append(tup)
-        
+
+            print("calculatin wasser", flush=True)
             for result in pool.starmap(DistanceHandler.emd2_wrapper, tup_list):
                 res, i, j = result
                 distances[i,j] = res
-                
+                print("done another 1 out of ", len(tup_list), flush=True)
 
             del tup_list
             pool.close()  # no more tasks

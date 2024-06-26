@@ -98,7 +98,7 @@ if __name__ == '__main__':
             distance_handler = DistancesHandler.DistanceHandler(WASSERSTEIN,distances_bands)
             precomputed_distances = distance_handler.calc_distances(X_patches)
 
-
+            print(precomputed_distances.device)
 
             avg_acc_train = 0.0
             avg_acc_test = 0.0
