@@ -23,7 +23,6 @@ sys.path.append('../paviaUTools/')
 # sys.path.insert(1, '../utils')
 # sys.path.insert(2, '../paviaUTools')
 
-import matplotlib.pyplot as plt
 from datasetLoader import datasetLoader
 import os
 import numpy as np
@@ -91,9 +90,9 @@ if __name__ == '__main__':
     clusters_amounts = [5,25]
     is_normalize_each_band = True
     
+    print("HERE!")
 
-
-    factor = 7
+    factor = 29
     rows_factor = factor
     cols_factor = factor
     avg_acc_train = 0.0
