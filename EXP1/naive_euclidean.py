@@ -37,20 +37,20 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 if __name__ == '__main__':
     parent_dir = os.path.join(os.getcwd(),"..")
-    # csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
-    # gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
+    csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
+    gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
     # csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
     # gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
-    csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
-    gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
+    # csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
+    # gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
 
     dsl = datasetLoader(csv_path, gt_path)
 
     df = dsl.read_dataset(gt=False)
     X = np.array(df)
-    # X = X.reshape((610,340, 103))
+    X = X.reshape((610,340, 103))
     # X = X.reshape((1096, 715, 102))
-    X = X.reshape((512, 614, 176))
+    # X = X.reshape((512, 614, 176))
 
     df = dsl.read_dataset(gt=True)
     y = np.array(df)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     is_normalize_each_band = True
     method_label_patch='most_common'
 
-    for factor in [11,9,7,5]:
+    for factor in [11,9,7,5,4,3]:
         avg_acc_train = 0.0
         avg_acc_test = 0.0
         for i in range(reps):
