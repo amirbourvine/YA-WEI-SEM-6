@@ -74,19 +74,38 @@ if __name__ == '__main__':
     -1079138285,
     -424805109]
 
-    distances_bands = HDDOnBands.run(X, consts.METRIC_BANDS, None)
-    distances_bands = distances_bands.to(device)
+    distances_bands_hdd = HDDOnBands.run(X, consts.METRIC_BANDS, None)
+    distances_bands_hdd = distances_bands_hdd.to(device)
+
+    tmp = torch.reshape(X, (X.shape[-1], -1)).float()
+    distances_bands_euc = torch.cdist(tmp, tmp)
+    distances_bands_euc = distances_bands_euc.to(device)
 
     is_normalize_each_band = True
     method_label_patch='most_common'
 
     for M in ['hdd', 'euclidean']:
         print(f"*******************RESULTS OF M={M}************************")
+        if M=='hdd':
+            distances_bands = distances_bands_hdd
+        elif M=='euclidean':
+            distances_bands = distances_bands_euc
+
         for factor in [11,9,7,5]:
+            
+            if is_normalize_each_band:
+                X_tmp = HDD_HDE.normalize_each_band(X)
+            else:
+                X_tmp = X
+            X_patches, _, _= HDD_HDE.patch_data_class(X_tmp, factor, factor, y, method_label_patch)
+            distance_handler = DistancesHandler.DistanceHandler(consts.WASSERSTEIN,distances_bands)
+            precomputed_distances = distance_handler.calc_distances(X_patches)
+
+
             avg_acc_train = 0.0
             avg_acc_test = 0.0
             for i in range(reps):
-                train_acc,test_acc, test_preds,test_gt = wasser_classify(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i], M=M)
+                train_acc,test_acc, test_preds,test_gt = wasser_classify(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i], M=M, precomputed_distances=precomputed_distances)
                 avg_acc_train += train_acc/reps
                 avg_acc_test += test_acc/reps
 

@@ -64,7 +64,7 @@ if __name__ == '__main__':
     -1079138285,
     -424805109]
 
-    distances_bands = HDDOnBands.run(X)
+    distances_bands = HDDOnBands.run(X, consts.METRIC_BANDS, None)
     distances_bands = distances_bands.to(device)
 
     is_normalize_each_band = True
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         print("METHOD: ", method)
 
-        for factor in [13, 11, 9]:
+        for factor in [7,5]:
             if is_normalize_each_band:
                 X_tmp = HDD_HDE.normalize_each_band(X)
             else:

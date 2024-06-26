@@ -177,7 +177,7 @@ def whole_pipeline_divided_parallel(X,y, rows_factor, cols_factor, is_normalize_
 
 
 
-def wasser_classify(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, M=''):
+def wasser_classify(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, M='', precomputed_distances=None):
         if M!='hdd' and M!='euclidean':
             print("invalid M")
             return None
