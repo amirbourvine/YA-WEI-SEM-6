@@ -222,7 +222,7 @@ def whole_pipeline_all_euclidean(X,y, rows_factor, cols_factor, is_normalize_eac
 
         y_patches = y_patches.flatten()
         
-        distance_handler = DistancesHandler(method_type=consts.REGULAR_METHOD, distances_bands=None)
+        distance_handler = DistancesHandler.DistanceHandler(method_type=consts.REGULAR_METHOD, distances_bands=None)
         distances = distance_handler.calc_distances(X_patches)
 
 
