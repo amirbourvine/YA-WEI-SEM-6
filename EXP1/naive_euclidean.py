@@ -74,23 +74,29 @@ if __name__ == '__main__':
     -1079138285,
     -424805109]
 
+    task_id = int(sys.argv[1])
+
     is_normalize_each_band = True
     method_label_patch='most_common'
 
-    for factor in [11,9,7,5,4,3]:
-        avg_acc_train = 0.0
-        avg_acc_test = 0.0
-        for i in range(reps):
-            
-            train_acc,test_acc, test_preds,test_gt = whole_pipeline_all_euclidean(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i])
-            avg_acc_train += train_acc/reps
-            avg_acc_test += test_acc/reps
+    factors = [11,9,7,5,4,3]
+    
+    factor = factors[task_id]
+    
+    print(f"worker {task_id} is working with factor={factor} on device={device}")
+    
+    avg_acc_train = 0.0
+    avg_acc_test = 0.0
+    for i in range(reps):
+        train_acc,test_acc, test_preds,test_gt = whole_pipeline_all_euclidean(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i])
+        avg_acc_train += train_acc/reps
+        avg_acc_test += test_acc/reps
 
-            print("iteration ", i, " DONE")
+        print("iteration ", i, " DONE")
 
-            torch.cuda.empty_cache()
-            gc.collect()
+        torch.cuda.empty_cache()
+        gc.collect()
 
-        print("factor: ", factor)
-        print("avg_acc_train: ", avg_acc_train)
-        print("avg_acc_test: ", avg_acc_test)
+    print("factor: ", factor)
+    print("avg_acc_train: ", avg_acc_train)
+    print("avg_acc_test: ", avg_acc_test)
