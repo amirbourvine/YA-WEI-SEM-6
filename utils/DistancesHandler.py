@@ -86,59 +86,54 @@ class DistanceHandler:
 
             distances = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]), device=device)
 
-            st = time.time()
-            # # parallel code section START
-            try:
-                mp.set_start_method('spawn')
-            except RuntimeError:
-                pass
+            # st = time.time()
+            # # # parallel code section START
+            # try:
+            #     mp.set_start_method('spawn')
+            # except RuntimeError:
+            #     pass
     
-            distances.share_memory_()
-            X_patches_vector.share_memory_()
-            self.distances_bands.share_memory_()
+            # distances.share_memory_()
+            # X_patches_vector.share_memory_()
+            # self.distances_bands.share_memory_()
             
-            pool_size =  consts.POOL_SIZE_WASSERSTEIN if torch.cuda.is_available() else mp.cpu_count() * 2
-            pool = mp.Pool(processes=pool_size)
-            print(f"running on device={device} with pool size={pool_size}")
+            # pool_size =  consts.POOL_SIZE_WASSERSTEIN if torch.cuda.is_available() else mp.cpu_count() * 2
+            # pool = mp.Pool(processes=pool_size)
+            # print(f"running on device={device} with pool size={pool_size}")
 
-            tup_list = []
+            # tup_list = []
 
-            for i in range(X_patches_vector.shape[1]):
-                for j in range(X_patches_vector.shape[1]):
-                    tup = (X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands, i, j)
-                    tup_list.append(tup)
+            # for i in range(X_patches_vector.shape[1]):
+            #     for j in range(X_patches_vector.shape[1]):
+            #         tup = (X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands, i, j)
+            #         tup_list.append(tup)
 
-            print("calculatin wasser", flush=True)
-            count = 0
-            for result in pool.starmap(DistanceHandler.emd2_wrapper, tup_list):
-                res, i, j = result
-                distances[i,j] = res
-                print(f"done {count} out of {len(tup_list)}", flush=True)
-                count += 1
+            # print("calculatin wasser", flush=True)
+            # count = 0
+            # for result in pool.starmap(DistanceHandler.emd2_wrapper, tup_list):
+            #     res, i, j = result
+            #     distances[i,j] = res
+            #     print(f"done {count} out of {len(tup_list)}", flush=True)
+            #     count += 1
 
-            pool.close()  # no more tasks
+            # pool.close()  # no more tasks
 
-            pool.join()  # wrap up current tasks
+            # pool.join()  # wrap up current tasks
 
-            del tup_list
+            # del tup_list
 
+            # print("PARALLEL WASSER TIME: ", time.time()-st)
+            
             # parallel code section END
 
-            print("PARALLEL WASSER TIME: ", time.time()-st)
-
+            
+            st = time.time()
             # Compute Wasserstein distance
-            # distances_try = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]))
-            # for i in range(X_patches_vector.shape[1]):
-            #     print(f"ITER {i} OUT OF {X_patches_vector.shape[1]}")
-            #     for j in range(X_patches_vector.shape[1]):
-            #         distances_try[i,j] = ot.emd2(X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands)
+            for i in range(X_patches_vector.shape[1]):
+                print(f"ITER {i} OUT OF {X_patches_vector.shape[1]}")
+                for j in range(X_patches_vector.shape[1]):
+                    distances[i,j] = ot.emd2(X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands)
 
-            # print("SERIAL TIME: ", st-time.time())
-
-            # print("is paralle good ? ", np.allclose(distances, distances_try))
-
-
-            # distances = torch.tensor(distances, dtype=consts.dist_dtype)
-            # distances = distances.to(device=device)
+            print("SERIAL WASSER TIME: ", time.time()-st)
 
         return distances

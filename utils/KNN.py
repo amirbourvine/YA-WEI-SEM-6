@@ -21,8 +21,12 @@ class kNN:
 
 
     def score_not_devided(self, distances, indices_test, y):
+        print(f"distances.shape: {distances.shape}", flush=True)
+        
         y_mat = np.tile(self.labels,(distances.shape[0],1))
-
+        
+        print(f"y_mat.shape: {y_mat.shape}", flush=True)
+        
         sorted_distances_labels = np.take_along_axis(y_mat, np.argsort(distances, axis=1), axis=1)
 
         X_kNN = sorted_distances_labels[:, :self.n_neighbors]
