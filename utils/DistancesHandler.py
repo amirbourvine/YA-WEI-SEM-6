@@ -127,13 +127,30 @@ class DistanceHandler:
             # parallel code section END
 
             
-            st = time.time()
-            # Compute Wasserstein distance
             for i in range(X_patches_vector.shape[1]):
-                print(f"ITER {i} OUT OF {X_patches_vector.shape[1]}")
-                for j in range(X_patches_vector.shape[1]):
-                    distances[i,j] = ot.emd2(X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands)
+                for j in range(i + 1, X_patches_vector.shape[1]):
+                    distances[i, j] = ot.emd2(X_patches_vector[:, i], X_patches_vector[:, j], self.distances_bands)
+                    distances[j, i] = distances[i, j] 
 
-            print("SERIAL WASSER TIME: ", time.time()-st)
+            
+            
+            # IMPROVEMENT SECTION FOR EFFICIENCY **START**
+
+
+            # distances_try = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]), device=device)
+
+            # st = time.time()
+
+
+            # #put here the code for distances_try
+
+            # print("IMPROVEMENT WASSER TIME: ", time.time()-st)
+
+            
+            # print(f"IS IMPROVEMENT GOOD? {torch.allclose(distances, distances_try)}")
+
+
+            # IMPROVEMENT SECTION FOR EFFICIENCY **END**
+
 
         return distances
