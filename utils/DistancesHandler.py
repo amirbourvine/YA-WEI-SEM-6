@@ -104,7 +104,7 @@ class DistanceHandler:
             # tup_list = []
 
             # for i in range(X_patches_vector.shape[1]):
-            #     for j in range(X_patches_vector.shape[1]):
+            #     for j in range(i+1, X_patches_vector.shape[1]):
             #         tup = (X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands, i, j)
             #         tup_list.append(tup)
 
@@ -113,6 +113,7 @@ class DistanceHandler:
             # for result in pool.starmap(DistanceHandler.emd2_wrapper, tup_list):
             #     res, i, j = result
             #     distances[i,j] = res
+            #     distances[j, i] = res
             #     print(f"done {count} out of {len(tup_list)}", flush=True)
             #     count += 1
 
