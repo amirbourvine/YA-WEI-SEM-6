@@ -69,7 +69,7 @@ if __name__ == '__main__':
     X = X.to(device)
     y = y.to(device)
 
-    factor = 61
+    factor = 21
     is_normalize_each_band = True
     method_label_patch = 'most_common'
 
@@ -87,7 +87,8 @@ if __name__ == '__main__':
     num_reps = 1
     
     st = time.time()
-    for i in range(num_reps):
-        precomputed_distances = distance_handler.calc_distances(X_patches)
-        
+    precomputed_distances = distance_handler.calc_distances(X_patches)
+    
+    print("SHOULD be printed", flush=True)    
+    
     print("AVG TIME: ", (time.time()-st)/num_reps)

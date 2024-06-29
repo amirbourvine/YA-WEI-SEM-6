@@ -7,7 +7,7 @@ import time
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+cpu = torch.device("cpu")
 class DistanceHandler:
     def __init__(self, method_type, distances_bands):
         self.method_type = method_type
@@ -84,10 +84,14 @@ class DistanceHandler:
             X_patches_vector = (X_patches_vector - min_vals) / (max_vals - min_vals)
             X_patches_vector = X_patches_vector / torch.sum(X_patches_vector, dim=0)
 
-            distances = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]), device=device)
+            distances = torch.zeros((X_patches_vector.shape[1],X_patches_vector.shape[1]), device=cpu)
 
             # # # parallel code section START
             print("start parallel code!", flush=True)
+            
+            # send all to cpu
+            distances_bands = self.distances_bands.cpu().numpy().copy()
+            X_patches_vector = X_patches_vector.cpu().numpy().copy()
             
             st = time.time()
             
@@ -95,9 +99,7 @@ class DistanceHandler:
             try:
                 mp.set_start_method('spawn')
             except RuntimeError:
-                pass
-    
-            print("here!", flush=True)
+                print("MAY BE A PROBLEM: START_METHOD IS NOT SPAWN!")
             
             pool_size = consts.POOL_SIZE_CPU
             pool = mp.Pool(processes=pool_size)
@@ -108,7 +110,7 @@ class DistanceHandler:
 
             for i in range(X_patches_vector.shape[1]):
                 for j in range(i+1, X_patches_vector.shape[1]):
-                    tup = (X_patches_vector[:,i], X_patches_vector[:,j], self.distances_bands, i, j)
+                    tup = (X_patches_vector[:,i], X_patches_vector[:,j], distances_bands, i, j)
                     tup_list.append(tup)
 
             print(f"now starting calculate wasser", flush=True)
@@ -117,15 +119,16 @@ class DistanceHandler:
                 res, i, j = result
                 distances[i,j] = res
                 distances[j, i] = res
-                print("done", flush=True)
+                # print("done", flush=True)
 
             pool.close()  # no more tasks
 
             pool.join()  # wrap up current tasks
 
-            # del tup_list
-
             print("PARALLEL WASSER TIME: ", time.time()-st, flush=True)
+            
+            
+            distances.to(device)
             
             # parallel code section END
 
@@ -133,7 +136,7 @@ class DistanceHandler:
             
             # for i in range(X_patches_vector.shape[1]):
             #     for j in range(i + 1, X_patches_vector.shape[1]):
-            #         distances[i, j] = ot.emd2(X_patches_vector[:, i], X_patches_vector[:, j], self.distances_bands)
+            #         distances[i, j] = ot.emd2(X_patches_vector[:, i], X_patches_vector[:, j], distances_bands)
             #         distances[j, i] = distances[i, j] 
 
             # print("SERIAL WASSER TIME: ", time.time()-st)
@@ -155,6 +158,6 @@ class DistanceHandler:
 
 
             # IMPROVEMENT SECTION FOR EFFICIENCY **END**
-
-
+        
+        print("finished calculating distances", flush=True)
         return distances
