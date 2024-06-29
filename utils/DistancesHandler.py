@@ -123,9 +123,9 @@ class DistanceHandler:
 
             pool.join()  # wrap up current tasks
 
-            del tup_list
+            # del tup_list
 
-            print("PARALLEL WASSER TIME: ", time.time()-st)
+            print("PARALLEL WASSER TIME: ", time.time()-st, flush=True)
             
             # parallel code section END
 
