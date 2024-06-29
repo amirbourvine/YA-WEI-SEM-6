@@ -9,7 +9,9 @@ import networkx as nx
 from networkx.drawing.nx_pydot import graphviz_layout
 
 def show_distances(distances):
-    plt.imshow(distances.cpu().numpy())
+    temp = distances.cpu().numpy()
+    np.fill_diagonal(temp, np.nan)
+    plt.imshow(temp)
     plt.colorbar()
     plt.show()
 
