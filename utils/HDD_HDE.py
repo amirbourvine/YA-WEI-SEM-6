@@ -25,7 +25,15 @@ class HDD_HDE:
     def hdd(X,P):
         d_HDD = torch.zeros_like(P, device=device)
 
-        for k in range(consts.CONST_K + 1):
+        if consts.TYPE_OF_HDD=="pixels":
+            CONST_K = consts.CONST_K_PIXELS
+        elif consts.TYPE_OF_HDD=="bands":
+            CONST_K = consts.CONST_K_BANDS
+        else:
+            print(f"ERROR- INVALID consts.TYPE_OF_HDD={consts.TYPE_OF_HDD}")
+            exit(1) 
+        
+        for k in range(CONST_K + 1):
             norms = torch.cdist(X[k], X[k])
             sum_matrix = 2 * torch.arcsinh((2 ** (-k * consts.ALPHA + 1)) * norms)
             d_HDD += sum_matrix
@@ -56,7 +64,15 @@ class HDD_HDE:
 
         
     def calc_svd_p(d):
-        epsilon = consts.CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
+        if consts.TYPE_OF_HDD=="pixels":
+            CONST_C = consts.CONST_C_PIXELS
+        elif consts.TYPE_OF_HDD=="bands":
+            CONST_C = consts.CONST_C_BANDS
+        else:
+            print(f"ERROR- INVALID consts.TYPE_OF_HDD={consts.TYPE_OF_HDD}")
+            exit(1) 
+
+        epsilon = CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
 
         W = torch.exp(-1*d/epsilon)
 
@@ -110,8 +126,16 @@ class HDD_HDE:
         S_keep = S_keep.double()
         Vt = Vt.double()
 
-        X = torch.zeros((consts.CONST_K + 1, shortest_paths_mat.shape[0], shortest_paths_mat.shape[1] + 1), dtype= consts.dist_dtype, device=device)
-        for k in range (0, consts.CONST_K + 1):
+        if consts.TYPE_OF_HDD=="pixels":
+            CONST_K = consts.CONST_K_PIXELS
+        elif consts.TYPE_OF_HDD=="bands":
+            CONST_K = consts.CONST_K_BANDS
+        else:
+            print(f"ERROR- INVALID consts.TYPE_OF_HDD={consts.TYPE_OF_HDD}")
+            exit(1) 
+
+        X = torch.zeros((CONST_K + 1, shortest_paths_mat.shape[0], shortest_paths_mat.shape[1] + 1), dtype= consts.dist_dtype, device=device)
+        for k in range (0, CONST_K + 1):
             S = torch.float_power(S_keep, 2 ** (-k))
 
             aux = torch.matmul(torch.matmul(U,torch.diag(S)),Vt)
@@ -209,7 +233,15 @@ class HDD_HDE:
 
  
     def calc_P(d, apply_2_norm=consts.APPLY_2_NORM):
-        epsilon = consts.CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
+        if consts.TYPE_OF_HDD=="pixels":
+            CONST_C = consts.CONST_C_PIXELS
+        elif consts.TYPE_OF_HDD=="bands":
+            CONST_C = consts.CONST_C_BANDS
+        else:
+            print(f"ERROR- INVALID consts.TYPE_OF_HDD={consts.TYPE_OF_HDD}")
+            exit(1) 
+
+        epsilon = CONST_C*torch.mean(d, dim=tuple(np.arange(len(d.shape))))
 
         # print("epsilon: ", epsilon, flush=True)
         W = torch.exp(-1*d/epsilon)
@@ -268,6 +300,8 @@ class HDD_HDE:
 
  
     def calc_hdd(self):
+        consts.TYPE_OF_HDD = "pixels"
+
         distances,y_patches,num_patches_in_row, labels_padded = self.prepare()
 
         hdd_mat = HDD_HDE.run_method(distances)
