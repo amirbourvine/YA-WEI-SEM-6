@@ -1,5 +1,5 @@
 """
-TO RUN: python3 wasser_classify.py > wasser_classify.txt
+TO RUN: python3 optimize_wasser.py > optimize_wasser.txt
 
 NOTES:
 """
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     X = X.to(device)
     y = y.to(device)
 
-    factor = 61
+    factor = 21
     is_normalize_each_band = True
     method_label_patch = 'most_common'
 

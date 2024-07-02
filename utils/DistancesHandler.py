@@ -117,7 +117,7 @@ class DistanceHandler:
                 res, i, j = result
                 distances[i,j] = res
                 distances[j, i] = res
-                print("done", flush=True)
+                # print("done", flush=True)
 
             pool.close()  # no more tasks
 
