@@ -13,4 +13,4 @@
 
 
 # Run the task
-python3 optimize_wasser.py $SLURM_ARRAY_TASK_ID $SLURM_ARRAY_TASK_COUNT
+python3 script.py $SLURM_ARRAY_TASK_ID $SLURM_ARRAY_TASK_COUNT
