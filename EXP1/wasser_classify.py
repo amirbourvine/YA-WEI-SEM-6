@@ -94,12 +94,10 @@ if __name__ == '__main__':
     save_to_csv = True
 
     task_id = int(sys.argv[1])
-    ind_factor = task_id % 4
-    ind_M = 0 if task_id<4 else 1
-    factors = [11,9,7,5]
+    ind_M = task_id % 2
+    factor = 5
     Ms = ['hdd', 'euclidean']
     M = Ms[ind_M]
-    factor = factors[ind_factor]
     
     print(f"worker {task_id} is working with factor={factor} on device={device}", flush=True)
     print(f"*******************RESULTS OF M={M}************************", flush=True)
