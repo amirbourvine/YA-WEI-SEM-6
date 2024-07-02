@@ -10,7 +10,7 @@ APPLY_2_NORM =True
 dist_dtype = torch.float64 #for resolution adjustments
 POOL_SIZE_WASSERSTEIN = 8
 POOL_SIZE_HDD = 3
-POOL_SIZE_CPU = 4
+POOL_SIZE_CPU = 8
 
 METRIC_BANDS = 'euclidean'
 METRIC_PIXELS = 'euclidean'

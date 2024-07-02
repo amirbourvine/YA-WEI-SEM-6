@@ -87,7 +87,8 @@ if __name__ == '__main__':
     num_reps = 1
     
     st = time.time()
-    for i in range(num_reps):
-        precomputed_distances = distance_handler.calc_distances(X_patches)
-        
+    precomputed_distances = distance_handler.calc_distances(X_patches)
+    
+    print("SHOULD be printed", flush=True)    
+    
     print("AVG TIME: ", (time.time()-st)/num_reps)
