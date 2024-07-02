@@ -1,5 +1,5 @@
 """
-TO RUN: python3 wasser_classify.py > wasser_classify.txt
+TO RUN: python3 optimize_wasser.py > optimize_wasser.txt
 
 NOTES:
 """

@@ -68,6 +68,8 @@ def cosine(tensor, eps):
 
 class HDDOnBands:
     def run(tensor, metric, factors_for_batch=None, eps=1e-8):
+        consts.TYPE_OF_HDD = "bands"
+        
         if factors_for_batch is None:
             if metric!='euclidean' and metric!='cosine':
                 print("ERROR- INVALID METRIC")
