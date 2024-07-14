@@ -9,7 +9,7 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 cpu = torch.device("cpu")
 class DistanceHandler:
-    def __init__(self, method_type, distances_bands):
+    def __init__(self, method_type, distances_bands=[]):
         self.method_type = method_type
         self.distances_bands = distances_bands
     

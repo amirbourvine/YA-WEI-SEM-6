@@ -52,30 +52,25 @@ random_seeds = [-923723872,
 
 is_normalize_each_band = True
 method_label_patch='most_common'
-
-factor = 11
+dataset_name = 'pavia'
+factor = 9
+M = 'euclidean'
 
 WASSER_CALSSIFY = 1
 WASSER_MHDD_HDD = 2
 WASSER_MEUC_HDD = 3
 
-def evaluate_wasser(c,k, X,y, factor, precomputed_distances,patched_labels, labels, type):
+
+def evaluate_wasser(c,k, X,y, factor, precomputed_distances,patched_labels, labels):
     torch.cuda.empty_cache()
     gc.collect()
 
-    consts.CONST_C_BANDS = c
-    consts.CONST_K_BANDS = k
+    consts.CONST_C_PIXELS = c
+    consts.CONST_K_PIXELS = k
 
     avg_acc_test = 0.0
     for i in range(reps):
-        if type==WASSER_CALSSIFY:
-            _,test_acc, _,_ = wasser_classify(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i], M='hdd', precomputed_pack=(precomputed_distances,patched_labels, labels))
-        elif type==WASSER_MHDD_HDD:
-            _,test_acc, _,_ =  wasser_hdd(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i], M='hdd', precomputed_pack=(precomputed_distances,patched_labels, labels))
-        elif type==WASSER_MEUC_HDD:
-            _,test_acc, _,_ = wasser_hdd(X,y, factor, factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, M='euclidean', precomputed_pack=(precomputed_distances,patched_labels, labels))
-
-
+        _,test_acc, _,_ = wasser_hdd(X,y, factor, factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, M='euclidean', precomputed_pack=(precomputed_distances,patched_labels, labels))
         avg_acc_test += test_acc/reps
 
     score = avg_acc_test
@@ -83,7 +78,7 @@ def evaluate_wasser(c,k, X,y, factor, precomputed_distances,patched_labels, labe
 
 
 class Objective:
-    def __init__(self, min_c, max_c, min_k, max_k, X,y, factor,patched_labels, labels, X_patches, type):
+    def __init__(self, min_c, max_c, min_k, max_k, X,y, factor,patched_labels, labels, X_patches):
         # Hold this implementation specific arguments as the fields of the class.
         self.min_c = min_c
         self.max_c = max_c
@@ -95,7 +90,6 @@ class Objective:
         self.patched_labels = patched_labels
         self.labels = labels
         self.X_patches = X_patches
-        self.type = type
 
 
     def __call__(self, trial):
@@ -103,45 +97,57 @@ class Objective:
         c_hyperparameter = trial.suggest_float('c', self.min_c, self.max_c)
         k_hyperparameter = trial.suggest_int('k', self.min_k, self.max_k)
 
+        print(f"working with k={k_hyperparameter} and c={c_hyperparameter}")
         
-        if self.type==WASSER_MHDD_HDD or self.type==WASSER_CALSSIFY:
-            distances_bands = HDDOnBands.run(self.X, consts.METRIC_BANDS, None)
-            distances_bands = distances_bands.to(device)
+        tmp = torch.reshape(X, (X.shape[-1], -1)).float()
+        distances_bands = torch.cdist(tmp, tmp)
+        
+        if is_normalize_each_band:
+            X_tmp = HDD_HDE.normalize_each_band(X)
         else:
-            tmp = torch.reshape(X, (X.shape[-1], -1)).float()
-            distances_bands = torch.cdist(tmp, tmp)
+            X_tmp = X
 
-        distance_handler = DistancesHandler.DistanceHandler(consts.WASSERSTEIN,distances_bands)
-        precomputed_distances = distance_handler.calc_distances(self.X_patches)
-
-        score = evaluate_wasser(c_hyperparameter, k_hyperparameter, self.X,self.y, self.factor, precomputed_distances,self.patched_labels, self.labels, self.type)
+        X_patches, _, _ = HDD_HDE.patch_data_class(X_tmp, factor, factor, y, method_label_patch)
+        
+        poss_file_name = f"wassers/wasser_{M}_{factor}_{dataset_name}"
+        
+        if os.path.isfile(poss_file_name):
+            print("USING SAVED PRECOMPUTED DISTANCES!", flush=True)
+            df = pd.read_csv(poss_file_name)
+            precomputed_distances = torch.Tensor(df.to_numpy())
+        else:
+            distance_handler = DistancesHandler.DistanceHandler(consts.WASSERSTEIN,distances_bands)
+            precomputed_distances = distance_handler.calc_distances(X_patches)
+            df = pd.DataFrame(precomputed_distances.cpu().numpy())
+            df.to_csv(poss_file_name,index=False)
+        
+        precomputed_distances = precomputed_distances.to(device)
+        score = evaluate_wasser(c_hyperparameter, k_hyperparameter, self.X,self.y, self.factor, precomputed_distances,self.patched_labels, self.labels)
         
         return score
 
 
 if __name__ == '__main__':
+    
     parent_dir = os.path.join(os.getcwd(),"..")
     
     # csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
     # gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
-    # dataset_name = 'paviaU'
     
-    # csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
-    # gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
-    # dataset_name = 'paviaCenter'
+    csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
+    gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
     
-    csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
-    gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
-    dataset_name = 'KSC'
+    # csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
+    # gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
     
-
     dsl = datasetLoader(csv_path, gt_path)
 
     df = dsl.read_dataset(gt=False)
     X = np.array(df)
+    
     # X = X.reshape((610,340, 103))
-    # X = X.reshape((1096, 715, 102))
-    X = X.reshape((512, 614, 176))
+    X = X.reshape((1096, 715, 102))
+    # X = X.reshape((512, 614, 176))
 
     df = dsl.read_dataset(gt=True)
     y = np.array(df)
@@ -152,7 +158,7 @@ if __name__ == '__main__':
     X = X.to(device)
     y = y.to(device)
     
-    print(f"worker is working with factor={factor} on device={device} and validating **BANDS** HYPERPARAMS", flush=True)
+    print(f"worker is working with factor={factor} on device={device} and validating *PIXELS* HYPERPARAMS ON *{dataset_name}*", flush=True)
     
     if is_normalize_each_band:
         X_tmp = HDD_HDE.normalize_each_band(X)
@@ -166,13 +172,13 @@ if __name__ == '__main__':
     # Create a study object and specify the direction of optimization
     study = optuna.create_study(direction='maximize')
 
-    min_c = 1.0
+    min_c = 0.1
     max_c = 10.0
-    min_k = 1
-    max_k = 19
+    min_k = 4
+    max_k = 16
 
     # Start the optimization
-    study.optimize(Objective(min_c, max_c, min_k, max_k, X,y, factor,patched_labels, labels, X_patches, type=WASSER_CALSSIFY), n_trials=10)
+    study.optimize(Objective(min_c, max_c, min_k, max_k, X,y, factor,patched_labels, labels, X_patches), n_trials=100)
 
     # Print the best hyperparameter and its corresponding score
     print("Best c: ", study.best_params['c'])
