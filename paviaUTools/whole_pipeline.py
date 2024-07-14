@@ -22,13 +22,12 @@ cpu = torch.device("cpu")
 
 
 def whole_pipeline_all(X,y, rows_factor, cols_factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, method_type = consts.REGULAR_METHOD, distances_bands=None, precomputed_distances = None):
-        my_HDD_HDE = HDD_HDE(X,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, method_type, distances_bands, precomputed_distances=precomputed_distances)
-
         print("XXXXXXX IN METHOD XXXXXXXXX")
         st = time.time()
 
+        my_HDD_HDE = HDD_HDE(X,y, rows_factor, cols_factor, is_normalize_each_band, method_label_patch, method_type, distances_bands, precomputed_distances=precomputed_distances)
         d_HDD, labels_padded, num_patches_in_row,y_patches = my_HDD_HDE.calc_hdd()
-
+        
         print("WHOLE METHOD TIME: ", time.time()-st, flush=True)
         st = time.time()
 

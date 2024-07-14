@@ -276,7 +276,7 @@ class HDD_HDE:
         return P
 
     
-    def prepare(self):
+    def prepare(self, calc_distances=True):
         X = self.X
         
         if self.is_normalize_each_band:
@@ -290,10 +290,12 @@ class HDD_HDE:
 
         y_patches = y_patches.flatten()
         
-        if self.precomputed_distances is None:
-            distances = self.distance_handler.calc_distances(X_patches)
-        else:
-            distances = self.precomputed_distances
+        distances = None
+        if calc_distances:
+            if self.precomputed_distances is None:
+                distances = self.distance_handler.calc_distances(X_patches)
+            else:
+                distances = self.precomputed_distances
 
         return distances,y_patches,num_patches_in_row, labels_padded 
 
@@ -304,7 +306,11 @@ class HDD_HDE:
 
         distances,y_patches,num_patches_in_row, labels_padded = self.prepare()
 
-        hdd_mat = HDD_HDE.run_method(distances)
+        if consts.HIERARCHICAL_METHOD == 'HDD':
+            hdd_mat = HDD_HDE.run_method(distances)
+        else:
+            # ya wei's plug in method that given distances between patches returns distances between patches for classification
+            pass 
 
         return hdd_mat, labels_padded, num_patches_in_row,y_patches
 

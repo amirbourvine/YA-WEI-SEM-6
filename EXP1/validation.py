@@ -52,9 +52,12 @@ random_seeds = [-923723872,
 
 is_normalize_each_band = True
 method_label_patch='most_common'
+M = 'euclidean'
+
+
 dataset_name = 'pavia'
 factor = 9
-M = 'euclidean'
+
 
 WASSER_CALSSIFY = 1
 WASSER_MHDD_HDD = 2
@@ -131,23 +134,24 @@ if __name__ == '__main__':
     
     parent_dir = os.path.join(os.getcwd(),"..")
     
-    # csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
-    # gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
-    
-    csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
-    gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
-    
-    # csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
-    # gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
-    
+    if dataset_name=='paviaU':
+        csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
+        new_shape = (610,340, 103)
+    if dataset_name=='pavia':
+        csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
+        new_shape = (1096, 715, 102)
+    if dataset_name=='KSC':
+        csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
+        new_shape = (512, 614, 176)
+        
     dsl = datasetLoader(csv_path, gt_path)
 
     df = dsl.read_dataset(gt=False)
     X = np.array(df)
-    
-    # X = X.reshape((610,340, 103))
-    X = X.reshape((1096, 715, 102))
-    # X = X.reshape((512, 614, 176))
+    X = X.reshape(new_shape)
 
     df = dsl.read_dataset(gt=True)
     y = np.array(df)
