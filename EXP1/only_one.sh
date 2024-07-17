@@ -13,4 +13,4 @@
 
 
 # Run the task
-python3 validation.py 
+python3 run_test.py 
