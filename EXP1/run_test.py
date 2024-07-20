@@ -105,6 +105,7 @@ if __name__ == '__main__':
         df = pd.read_csv(poss_file_name)
         precomputed_distances = torch.Tensor(df.to_numpy())
     else:
+        print("CALCULATING DISTANCES!", flush=True)
         distance_handler = DistancesHandler.DistanceHandler(consts.WASSERSTEIN,distances_bands)
         precomputed_distances = distance_handler.calc_distances(X_patches)
         df = pd.DataFrame(precomputed_distances.cpu().numpy())

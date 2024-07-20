@@ -1,9 +1,3 @@
-"""
-TO RUN: python3 naive_euclidean.py > naive_euclidean.txt
-
-NOTES:
-"""
-
 
 import sys
 sys.path.append('../utils/')
@@ -35,22 +29,36 @@ gc.collect()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+reps = 10
+is_normalize_each_band = True
+method_label_patch='most_common'
+
+
+factor = 9
+dataset_name = 'pavia'
+
+
 if __name__ == '__main__':
     parent_dir = os.path.join(os.getcwd(),"..")
-    csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
-    gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
-    # csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
-    # gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
-    # csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
-    # gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
-
+    
+    if dataset_name=='paviaU':
+        csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
+        new_shape = (610,340, 103)
+    if dataset_name=='pavia':
+        csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
+        new_shape = (1096, 715, 102)
+    if dataset_name=='KSC':
+        csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
+        new_shape = (512, 614, 176)
+        
     dsl = datasetLoader(csv_path, gt_path)
 
     df = dsl.read_dataset(gt=False)
     X = np.array(df)
-    X = X.reshape((610,340, 103))
-    # X = X.reshape((1096, 715, 102))
-    # X = X.reshape((512, 614, 176))
+    X = X.reshape(new_shape)
 
     df = dsl.read_dataset(gt=True)
     y = np.array(df)
@@ -60,8 +68,6 @@ if __name__ == '__main__':
 
     X = X.to(device)
     y = y.to(device)
-
-    reps = 10
 
     random_seeds = [-923723872,
     883017324,
@@ -73,18 +79,7 @@ if __name__ == '__main__':
     -2096286485,
     -1079138285,
     -424805109]
-
-    task_id = int(sys.argv[1])
-
-    is_normalize_each_band = True
-    method_label_patch='most_common'
-
-    factors = [11,9,7,5,4,3]
-    
-    factor = factors[task_id]
-    
-    print(f"worker {task_id} is working with factor={factor} on device={device}")
-    
+     
     avg_acc_train = 0.0
     avg_acc_test = 0.0
     for i in range(reps):

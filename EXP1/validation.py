@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from datasetLoader import datasetLoader
 import os
 import numpy as np
-from whole_pipeline import whole_pipeline_all, whole_pipeline_divided, whole_pipeline_divided_parallel, wasser_classify, wasser_hdd
+from whole_pipeline import whole_pipeline_all, whole_pipeline_all_euclidean, whole_pipeline_divided, whole_pipeline_divided_parallel, wasser_classify, wasser_hdd
 import torch
 from plots import *
 from weights_anal import *
@@ -73,7 +73,7 @@ def evaluate_wasser(c,k, X,y, factor, precomputed_distances,patched_labels, labe
 
     avg_acc_test = 0.0
     for i in range(reps):
-        _,test_acc, _,_ = wasser_hdd(X,y, factor, factor, is_normalize_each_band=True, method_label_patch='most_common', random_seed=None, M='euclidean', precomputed_pack=(precomputed_distances,patched_labels, labels))
+        _,test_acc, _,_ =  whole_pipeline_all_euclidean(X,y, factor, factor, is_normalize_each_band=is_normalize_each_band, method_label_patch=method_label_patch, random_seed=random_seeds[i])
         avg_acc_test += test_acc/reps
 
     score = avg_acc_test

@@ -36,29 +36,35 @@ gc.collect()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+reps = 10
+is_normalize_each_band = True
+method_label_patch='most_common'
+
+dataset_name = 'pavia'
+factor = 9
+M = 'euclidean'
+
 if __name__ == '__main__':
     parent_dir = os.path.join(os.getcwd(),"..")
     
-    # csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
-    # gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
-    # dataset_name = 'paviaU'
-    
-    # csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
-    # gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
-    # dataset_name = 'paviaCenter'
-    
-    csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
-    gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
-    dataset_name = 'KSC'
-    
-
+    if dataset_name=='paviaU':
+        csv_path = os.path.join(parent_dir, 'datasets', 'paviaU.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'paviaU_gt.csv')
+        new_shape = (610,340, 103)
+    if dataset_name=='pavia':
+        csv_path = os.path.join(parent_dir, 'datasets', 'pavia.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'pavia_gt.csv')
+        new_shape = (1096, 715, 102)
+    if dataset_name=='KSC':
+        csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
+        new_shape = (512, 614, 176)
+        
     dsl = datasetLoader(csv_path, gt_path)
 
     df = dsl.read_dataset(gt=False)
     X = np.array(df)
-    # X = X.reshape((610,340, 103))
-    # X = X.reshape((1096, 715, 102))
-    X = X.reshape((512, 614, 176))
+    X = X.reshape(new_shape)
 
     df = dsl.read_dataset(gt=True)
     y = np.array(df)
@@ -68,8 +74,6 @@ if __name__ == '__main__':
 
     X = X.to(device)
     y = y.to(device)
-
-    reps = 10
 
     random_seeds = [-923723872,
     883017324,
@@ -82,31 +86,18 @@ if __name__ == '__main__':
     -1079138285,
     -424805109]
 
-    distances_bands_hdd = HDDOnBands.run(X, consts.METRIC_BANDS, None)
-    distances_bands_hdd = distances_bands_hdd.to(device)
+    # distances_bands_hdd = HDDOnBands.run(X, consts.METRIC_BANDS, None)
+    # distances_bands_hdd = distances_bands_hdd.to(device)
 
     tmp = torch.reshape(X, (X.shape[-1], -1)).float()
     distances_bands_euc = torch.cdist(tmp, tmp)
     distances_bands_euc = distances_bands_euc.to(device)
-
-    is_normalize_each_band = True
-    method_label_patch='most_common'
-    save_to_csv = True
-
-    task_id = int(sys.argv[1])
-    ind_M = task_id % 2
-    factor = 5
-    Ms = ['hdd', 'euclidean']
-    M = Ms[ind_M]
     
-    print(f"worker {task_id} is working with factor={factor} on device={device}", flush=True)
+    print(f"working with factor={factor} on device={device}", flush=True)
     print(f"*******************RESULTS OF M={M}************************", flush=True)
-    if M=='hdd':
-        distances_bands = distances_bands_hdd
-    elif M=='euclidean':
-        distances_bands = distances_bands_euc
+    distances_bands = distances_bands_euc
 
-    poss_file_name = f"wasser_{M}_{factor}_{dataset_name}"
+    poss_file_name = f"wassers/wasser_{M}_{factor}_{dataset_name}"
     
     if is_normalize_each_band:
         X_tmp = HDD_HDE.normalize_each_band(X)
@@ -124,7 +115,7 @@ if __name__ == '__main__':
         distance_handler = DistancesHandler.DistanceHandler(consts.WASSERSTEIN,distances_bands)
         precomputed_distances = distance_handler.calc_distances(X_patches)
 
-    if save_to_csv and not os.path.isfile(poss_file_name):
+    if not os.path.isfile(poss_file_name):
         df = pd.DataFrame(precomputed_distances.cpu().numpy())
         df.to_csv(poss_file_name,index=False)
 
