@@ -14,12 +14,12 @@ This file includes a list of all of the constants and hyper-parameters we use.
 More Specifically, here is a list of all of the constants that you might want to change:
 
 
-* METRIC_BANDS = 'euclidean'
+METRIC_BANDS = 'euclidean'
 meaning: determines the metric that is used to calculate the distance between the bands.
 possible values: 'euclidean' or 'cosine'.
 
 
-* METRIC_PIXELS = 'euclidean'
+METRIC_PIXELS = 'euclidean'
 meaning: determines the metric that is used to calculate the distance between the pixels.
 possible values: 'euclidean' or 'cosine'.
 
@@ -29,8 +29,7 @@ in run_test.py:
 consts.METRIC_PIXELS = ‘cosine’.
 
 
-
-* HIERARCHICAL_METHOD = 'HDD'
+HIERARCHICAL_METHOD = 'HDD'
 meaning: it is a constant we created for you, which you could set to any value you would like. The usage is explained here:
         
 
@@ -42,7 +41,7 @@ in the file utils/HDD_HDE.py in the function calc_hdd in lines around 307:
 if consts.HIERARCHICAL_METHOD == 'HDD':
             hdd_mat = HDD_HDE.run_method(distances)
  else:
-# ya wei's plug in method that given distances between #patches returns distances between patches for classification
+ya wei's plug in method that given distances between #patches returns distances between patches for classification
             pass
 
 
@@ -65,22 +64,22 @@ Constants in the file that you might want to change:
 In run_test.py around lines 45-50 there are some parameters you might want to play with:
 
 
-# M is the way to calculate the matrix M which is the input to wasserstein. could be 'euclidean' or 'hdd'. because all of our results re with 'euclidean' i didn’t change the script if the value is different- if you want to check different value let us know and we will chnage it so it is possible.
+M is the way to calculate the matrix M which is the input to wasserstein. could be 'euclidean' or 'hdd'. because all of our results re with 'euclidean' i didn’t change the script if the value is different- if you want to check different value let us know and we will chnage it so it is possible.
 M = 'euclidean'
 
 
-# the number of reps to run the test for
+the number of reps to run the test for
 reps = 10
 
 
-# the dataset for the test- possible values:
+the dataset for the test- possible values:
 ‘paviaU’ for pavia University dataset
 ‘pavia’ for pavia Center dataset
 ‘KSC’ for KSC dataset
 dataset_name = 'pavia'
 
 
-# the factor for both x and y axes for the patching.
+the factor for both x and y axes for the patching.
 there are typical values we use of each of the datasets, which can be found here:
 validation results
 factor = 9
