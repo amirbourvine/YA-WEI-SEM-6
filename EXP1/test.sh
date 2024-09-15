@@ -14,4 +14,4 @@
 
 
 # Run the task
-python3 validation.py $SLURM_ARRAY_TASK_ID $SLURM_ARRAY_TASK_COUNT
+python3 validation_naive.py $SLURM_ARRAY_TASK_ID $SLURM_ARRAY_TASK_COUNT

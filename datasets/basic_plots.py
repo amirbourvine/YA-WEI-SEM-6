@@ -51,6 +51,8 @@ def plot_spectral_band(df, num=4):
             arr_list.append((arr.reshape((610, 340)),c))
         elif bands_num==176:
             arr_list.append((arr.reshape((512, 614)),c))
+        elif bands_num==126:
+            arr_list.append((arr.reshape((670, 605)),c))
 
     _, axs = plt.subplots(1,num, sharex=True, sharey=True, figsize=(15, 15))
     plt.tight_layout(pad=5.0)

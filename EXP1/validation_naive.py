@@ -55,7 +55,7 @@ method_label_patch='most_common'
 M = 'euclidean'
 
 
-dataset_name = 'pavia'
+dataset_name = 'Greding1'
 factor = 9
 
 
@@ -64,7 +64,7 @@ WASSER_MHDD_HDD = 2
 WASSER_MEUC_HDD = 3
 
 
-def evaluate_wasser(c,k, X,y, factor, precomputed_distances,patched_labels, labels):
+def evaluate_naive(c,k, X,y, factor):
     torch.cuda.empty_cache()
     gc.collect()
 
@@ -81,7 +81,7 @@ def evaluate_wasser(c,k, X,y, factor, precomputed_distances,patched_labels, labe
 
 
 class Objective:
-    def __init__(self, min_c, max_c, min_k, max_k, X,y, factor,patched_labels, labels, X_patches):
+    def __init__(self, min_c, max_c, min_k, max_k, X,y, factor):
         # Hold this implementation specific arguments as the fields of the class.
         self.min_c = min_c
         self.max_c = max_c
@@ -90,9 +90,6 @@ class Objective:
         self.X = X
         self.y = y
         self.factor = factor
-        self.patched_labels = patched_labels
-        self.labels = labels
-        self.X_patches = X_patches
 
 
     def __call__(self, trial):
@@ -102,35 +99,14 @@ class Objective:
 
         print(f"working with k={k_hyperparameter} and c={c_hyperparameter}")
         
-        tmp = torch.reshape(X, (X.shape[-1], -1)).float()
-        distances_bands = torch.cdist(tmp, tmp)
-        
-        if is_normalize_each_band:
-            X_tmp = HDD_HDE.normalize_each_band(X)
-        else:
-            X_tmp = X
-
-        X_patches, _, _ = HDD_HDE.patch_data_class(X_tmp, factor, factor, y, method_label_patch)
-        
-        poss_file_name = f"wassers/wasser_{M}_{factor}_{dataset_name}"
-        
-        if os.path.isfile(poss_file_name):
-            print("USING SAVED PRECOMPUTED DISTANCES!", flush=True)
-            df = pd.read_csv(poss_file_name)
-            precomputed_distances = torch.Tensor(df.to_numpy())
-        else:
-            distance_handler = DistancesHandler.DistanceHandler(consts.WASSERSTEIN,distances_bands)
-            precomputed_distances = distance_handler.calc_distances(X_patches)
-            df = pd.DataFrame(precomputed_distances.cpu().numpy())
-            df.to_csv(poss_file_name,index=False)
-        
-        precomputed_distances = precomputed_distances.to(device)
-        score = evaluate_wasser(c_hyperparameter, k_hyperparameter, self.X,self.y, self.factor, precomputed_distances,self.patched_labels, self.labels)
+        score = evaluate_naive(c_hyperparameter, k_hyperparameter, self.X,self.y, self.factor)
         
         return score
 
 
 if __name__ == '__main__':
+    print("RESULTS FOR NAIVE-> ONLY HDD!")
+    
     
     parent_dir = os.path.join(os.getcwd(),"..")
     
@@ -146,13 +122,26 @@ if __name__ == '__main__':
         csv_path = os.path.join(parent_dir, 'datasets', 'KSC.csv')
         gt_path = os.path.join(parent_dir, 'datasets', 'KSC_gt.csv')
         new_shape = (512, 614, 176)
+    if dataset_name=='Botswana':
+        csv_path = os.path.join(parent_dir, 'datasets', 'Botswana.csv')
+        gt_path = os.path.join(parent_dir, 'datasets', 'Botswana_gt.csv')
+        new_shape = (1476, 256, 145)
+    if dataset_name=='Greding1':
+        csv_path = os.path.join(parent_dir, 'datasets/new_dataset', 'Greding_Village1_refl.csv')
+        gt_path = os.path.join(parent_dir, 'datasets/new_dataset', 'Greding_Village1_refl_gt.csv')
+        new_shape = (670, 606, 126)
+    
         
     dsl = datasetLoader(csv_path, gt_path)
 
     df = dsl.read_dataset(gt=False)
     X = np.array(df)
     X = X.reshape(new_shape)
-
+    
+    if dataset_name=='Greding1':
+        X = X[:, :-1, :]
+        new_shape = (670, 605, 126)
+        
     df = dsl.read_dataset(gt=True)
     y = np.array(df)
 
@@ -164,15 +153,6 @@ if __name__ == '__main__':
     
     print(f"worker is working with factor={factor} on device={device} and validating *PIXELS* HYPERPARAMS ON *{dataset_name}*", flush=True)
     
-    if is_normalize_each_band:
-        X_tmp = HDD_HDE.normalize_each_band(X)
-    else:
-        X_tmp = X
-
-
-    X_patches, patched_labels, labels= HDD_HDE.patch_data_class(X_tmp, factor, factor, y, method_label_patch)
-    
-    
     # Create a study object and specify the direction of optimization
     study = optuna.create_study(direction='maximize')
 
@@ -182,7 +162,7 @@ if __name__ == '__main__':
     max_k = 16
 
     # Start the optimization
-    study.optimize(Objective(min_c, max_c, min_k, max_k, X,y, factor,patched_labels, labels, X_patches), n_trials=100)
+    study.optimize(Objective(min_c, max_c, min_k, max_k, X,y, factor), n_trials=100)
 
     # Print the best hyperparameter and its corresponding score
     print("Best c: ", study.best_params['c'])
